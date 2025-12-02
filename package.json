@@ -1,0 +1,33 @@
+{
+  "name": "starrailassistant",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "package": "powershell -ExecutionPolicy Bypass -File src-setup/Package.ps1",
+    "clean": "powershell -ExecutionPolicy Bypass -File src-setup/Clean.ps1",
+    "clean-all": "powershell -ExecutionPolicy Bypass -File src-setup/Clean-All.ps1"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.4.2",
+    "@tauri-apps/plugin-fs": "^2.4.4",
+    "@tauri-apps/plugin-opener": "^2",
+    "lucide-vue-next": "^0.553.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.3",
+    "vue3-markdown-it": "^1.0.10",
+    "vuedraggable": "^4.1.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "vue-tsc": "^2.1.10"
+  }
+}

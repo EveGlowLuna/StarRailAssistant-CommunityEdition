@@ -1,0 +1,38 @@
+﻿/data/
+/log/
+/SRAFrontend/bin/
+/SRAFrontend/obj/
+/SRAFrontend/SRAFrontend.sln.DotSettings.user
+/.venv/
+/.vscode/
+/setup/output/
+/setup/SRA/
+/setup/install_info.txt
+**/__pycache__/
+**/.vs/
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?
+
+# sra-cli
+StarRailAssistant
+# setup file
+src-setup/output
+src-setup/targetdir

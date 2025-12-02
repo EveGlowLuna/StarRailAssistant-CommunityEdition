@@ -1,0 +1,34 @@
+# ========== 前端文件保护 ==========
+# 这些文件永远使用我们的版本，合并时不被覆盖
+
+# Tauri 前端核心文件
+/src-tauri/** merge=ours
+/src/** merge=ours  
+/public/** merge=ours
+/src-setup/** merge=ours
+
+# 前端配置文件
+/index.html merge=ours
+/vite.config.ts merge=ours
+/tsconfig.json merge=ours
+/tsconfig.node.json merge=ours
+/package.json merge=ours
+/package-lock.json merge=ours
+
+# 项目文档和资源
+/README.md merge=ours
+/docs/** merge=ours
+/.vscode/** merge=ours
+/1.png merge=ours
+
+# ========== 特殊文件 ==========
+# package.py 保留我们的版本
+/package.py merge=ours
+
+# ========== 后端文件正常合并 ==========
+# Backend 目录内的文件正常接收上游更新
+/Backend/** merge=normal
+
+# ========== 工作流文件 ==========
+# GitHub Actions 工作流
+/.github/** merge=ours
