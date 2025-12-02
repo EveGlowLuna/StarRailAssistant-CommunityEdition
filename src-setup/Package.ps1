@@ -58,6 +58,19 @@ $setupIssContent = Get-Content $setupIssPath -Raw
 $setupIssContent = $setupIssContent -replace '#define MyAppVersion "unknown"', "#define MyAppVersion `"$version`""
 Set-Content $setupIssPath -Value $setupIssContent -NoNewline
 
+# Create output directory
+$outputDir = "src-setup\output"
+if (-not (Test-Path $outputDir)) {
+    New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+}
+
+# Create zip archive
+Write-Host "Creating zip archive..."
+$zipFileName = "StarRailAssistant-$version-portable.zip"
+$zipPath = Join-Path $outputDir $zipFileName
+Compress-Archive -Path "$targetDir\*" -DestinationPath $zipPath -Force
+Write-Host "Zip archive created: $zipFileName"
+
 # Compile with Inno Setup
 Write-Host "Building installer..."
 iscc "src-setup\setup.iss"
