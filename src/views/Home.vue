@@ -464,12 +464,12 @@ const showAnnouncement = async () => {
     new WebviewWindow('announcement', {
         url: '/announcement-window',
         title: t('announcement.title').value,
-        width: 900,
-        height: 700,
+        width: 800,
+        height: 600,
         center: true,
         resizable: true,
-        minWidth: 700,
-        minHeight: 500
+        minWidth: 600,
+        minHeight: 400
     });
 };
 

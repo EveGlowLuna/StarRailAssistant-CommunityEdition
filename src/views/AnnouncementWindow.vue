@@ -164,7 +164,12 @@ const loadAnnouncements = async () => {
     error.value = null;
 
     try {
-        const announcements = await invoke<Announcement[]>('get_announcements');
+        // 获取当前语言设置
+        const currentLang = localStorage.getItem('language') || 'zh-CN';
+        
+        const announcements = await invoke<Announcement[]>('get_announcements', { 
+            lang: currentLang 
+        });
 
         mainAnnouncement.value = null;
         releaseAnnouncement.value = null;
@@ -209,7 +214,8 @@ onMounted(() => {
 .announcement-window {
   width: 100vw;
   height: 100vh;
-  background: #f6f6f6;
+  background: url('../assets/background-lt.jpg') no-repeat center center;
+  background-size: cover;
   overflow: hidden;
 }
 
@@ -555,7 +561,8 @@ onMounted(() => {
 
 @media (prefers-color-scheme: dark) {
     .announcement-window {
-        background: #2f2f2f;
+        background: url('../assets/background-lt.jpg') no-repeat center center;
+        background-size: cover;
     }
 
     .announcement-container {

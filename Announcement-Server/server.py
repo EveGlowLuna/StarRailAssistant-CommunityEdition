@@ -62,23 +62,28 @@ class AnnouncementHandler(BaseHTTPRequestHandler):
 
             # Read files from the announces directory
             announces_dir = os.path.join(os.path.dirname(__file__), "announces")
-            announcements = []
+            announcements = {}
 
             if os.path.exists(announces_dir):
-                for filename in os.listdir(announces_dir):
-                    if filename.endswith(".md"):
-                        filepath = os.path.join(announces_dir, filename)
-                        with open(filepath, "r", encoding="utf-8") as file:
-                            content = file.read()
-                        announcements.append(
-                            {"name": filename.replace(".md", ""), "content": content}
-                        )
+                # Iterate through language directories (zh, en)
+                for lang in os.listdir(announces_dir):
+                    lang_dir = os.path.join(announces_dir, lang)
+                    if os.path.isdir(lang_dir):
+                        announcements[lang] = []
+                        for filename in os.listdir(lang_dir):
+                            if filename.endswith(".md"):
+                                filepath = os.path.join(lang_dir, filename)
+                                with open(filepath, "r", encoding="utf-8") as file:
+                                    content = file.read()
+                                announcements[lang].append(
+                                    {"name": filename.replace(".md", ""), "content": content}
+                                )
 
             # Write the JSON response with ensure_ascii=False to prevent \u escaping
             self.wfile.write(
                 json.dumps(announcements, ensure_ascii=False).encode("utf-8")
             )
-            logger.info(f"Served {len(announcements)} announcements")
+            logger.info(f"Served announcements for {len(announcements)} languages")
 
         # Handle /get-latest-version route
         elif self.path == "/get-latest-version":

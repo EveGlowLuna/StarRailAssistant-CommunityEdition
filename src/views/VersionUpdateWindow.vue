@@ -17,7 +17,8 @@ const { t } = useTranslation();
 .version-update-window {
   width: 100vw;
   height: 100vh;
-  background: #f6f6f6;
+  background: url('../assets/background-lt.jpg') no-repeat center center;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +50,8 @@ const { t } = useTranslation();
 
 @media (prefers-color-scheme: dark) {
     .version-update-window {
-        background: #2f2f2f;
+        background: url('../assets/background-lt.jpg') no-repeat center center;
+        background-size: cover;
     }
 
     .version-update-container {

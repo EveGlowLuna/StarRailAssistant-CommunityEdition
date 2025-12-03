@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
+import { useRoute } from 'vue-router'
 import Main from './views/Main.vue'
 import { setLocale } from './locales'
 import { useTranslation } from './composables/useTranslation'
 
 const { t } = useTranslation()
+const route = useRoute()
+
+// 判断是否是独立窗口路由
+const isStandaloneWindow = computed(() => {
+  return route.path === '/announcement-window' || route.path === '/version-update'
+})
 
 interface AppSettings {
   language: number
@@ -66,7 +73,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Main />
+  <Main v-if="!isStandaloneWindow" />
+  <router-view v-else />
 </template>
 
 <style scoped>

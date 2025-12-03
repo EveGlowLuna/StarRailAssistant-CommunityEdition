@@ -168,8 +168,8 @@ pub fn get_wallpaper_base64() -> Result<Option<String>, String> {
 
 // 公告管理命令
 #[tauri::command]
-pub async fn get_announcements() -> Result<Vec<announcement::Announcement>, String> {
-    announcement::get_announcements().await
+pub async fn get_announcements(lang: String) -> Result<Vec<announcement::Announcement>, String> {
+    announcement::get_announcements(lang).await
 }
 
 // 设置管理命令
