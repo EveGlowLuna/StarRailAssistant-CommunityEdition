@@ -19,10 +19,6 @@
             <House class="nav-icon" />
             <span class="nav-text">{{ t('nav.home') }}</span>
           </router-link>
-          <router-link to="/announcement" class="nav-item" :class="{ active: isActive('/announcement') }">
-            <Megaphone class="nav-icon" />
-            <span class="nav-text">{{ t('nav.announcement') }}</span>
-          </router-link>
           <router-link to="/tasks" class="nav-item" :class="{ active: isActive('/tasks') }">
             <SquareCheck class="nav-icon" />
             <span class="nav-text">{{ t('nav.tasks') }}</span>
@@ -56,7 +52,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { listen } from '@tauri-apps/api/event'
-import { House, Megaphone, SquareCheck, Plug, SquareTerminal, Settings } from 'lucide-vue-next'
+import { House, SquareCheck, Plug, SquareTerminal, Settings } from 'lucide-vue-next'
 import NotificationSystem from '../components/NotificationSystem.vue'
 import { useTranslation } from '../composables/useTranslation'
 

@@ -45,67 +45,114 @@
             </div>
         </div>
 
-        <!-- 下方面板：配置管理 -->
-        <div class="bottom-panel">
-            <div class="panel-content">
-                <!-- 操作按钮 -->
-                <div class="action-buttons">
-                    <button
-                        class="action-button refresh-button"
-                        @click="refreshConfigs"
-                    >
-                        {{ t('home.refresh') }}
-                    </button>
-                    <button
-                        class="action-button new-button"
-                        @click="showCreateDialog = true"
-                    >
-                        {{ t('home.newConfig') }}
-                    </button>
-                    <button
-                        class="action-button delete-button"
-                        :disabled="!hasSelectedConfigs"
-                        @click="deleteSelectedConfigs"
-                    >
-                        {{ t('home.deleteSelected') }}
-                    </button>
-                </div>
-
-                <!-- 配置列表 -->
-                <div class="config-list" v-if="configs.length > 0">
-                    <div
-                        v-for="config in orderedConfigs"
-                        :key="config.name"
-                        class="config-item"
-                        @mouseenter="hoveredConfig = config.name"
-                        @mouseleave="hoveredConfig = null"
-                    >
-                        <div class="config-order">{{ config.order }}</div>
-                        <input
-                            type="checkbox"
-                            :id="config.name"
-                            v-model="selectedConfigs"
-                            :value="config.name"
-                            class="config-checkbox"
-                            @change="saveTaskOrder"
-                        />
-                        <label :for="config.name" class="config-label">
-                            {{ config.name }}
-                        </label>
-                        <button
-                            v-if="hoveredConfig === config.name"
-                            class="delete-config-button"
-                            @click="deleteConfig(config.name)"
-                            title="删除配置"
-                        >
-                            <Trash :size="14" :color="'white'" />
+        <!-- 下方面板：左右分栏 -->
+        <div class="bottom-panels-container">
+            <!-- 左侧：功能展示区 -->
+            <div class="left-panel">
+                <div class="panel-content">
+                    <div class="section-header">
+                        <h3 class="section-title">{{ t('home.quickAccess') }}</h3>
+                    </div>
+                    <div class="feature-buttons">
+                        <button class="feature-button version-button" @click="showVersionUpdate">
+                            <div class="feature-icon">
+                                <RefreshCw :size="24" />
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">{{ t('home.versionUpdate') }}</div>
+                                <div class="feature-desc">{{ t('home.versionUpdateDesc') }}</div>
+                            </div>
+                        </button>
+                        
+                        <button class="feature-button announcement-button" @click="showAnnouncement">
+                            <div class="feature-icon">
+                                <Megaphone :size="24" />
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">{{ t('home.announcement') }}</div>
+                                <div class="feature-desc">{{ t('home.announcementDesc') }}</div>
+                            </div>
+                        </button>
+                        
+                        <button class="feature-button tutorial-button" @click="showTutorial">
+                            <div class="feature-icon">
+                                <BookOpen :size="24" />
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">{{ t('home.tutorial') }}</div>
+                                <div class="feature-desc">{{ t('home.tutorialDesc') }}</div>
+                            </div>
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- 空状态 -->
-                <div v-else class="empty-state">
-                    <span class="empty-text">没有可用的配置，请添加配置。</span>
+            <!-- 右侧：配置管理区 -->
+            <div class="right-panel">
+                <div class="panel-content">
+                    <div class="section-header">
+                        <h3 class="section-title">{{ t('home.configManagement') }}</h3>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="action-buttons">
+                        <button
+                            class="action-button refresh-button"
+                            @click="refreshConfigs"
+                        >
+                            {{ t('home.refresh') }}
+                        </button>
+                        <button
+                            class="action-button new-button"
+                            @click="showCreateDialog = true"
+                        >
+                            {{ t('home.newConfig') }}
+                        </button>
+                        <button
+                            class="action-button delete-button"
+                            :disabled="!hasSelectedConfigs"
+                            @click="deleteSelectedConfigs"
+                        >
+                            {{ t('home.deleteSelected') }}
+                        </button>
+                    </div>
+
+                    <!-- 配置列表 -->
+                    <div class="config-list" v-if="configs.length > 0">
+                        <div
+                            v-for="config in orderedConfigs"
+                            :key="config.name"
+                            class="config-item"
+                            @mouseenter="hoveredConfig = config.name"
+                            @mouseleave="hoveredConfig = null"
+                        >
+                            <div class="config-order">{{ config.order }}</div>
+                            <input
+                                type="checkbox"
+                                :id="config.name"
+                                v-model="selectedConfigs"
+                                :value="config.name"
+                                class="config-checkbox"
+                                @change="saveTaskOrder"
+                            />
+                            <label :for="config.name" class="config-label">
+                                {{ config.name }}
+                            </label>
+                            <button
+                                v-if="hoveredConfig === config.name"
+                                class="delete-config-button"
+                                @click="deleteConfig(config.name)"
+                                title="删除配置"
+                            >
+                                <Trash :size="14" :color="'white'" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 空状态 -->
+                    <div v-else class="empty-state">
+                        <span class="empty-text">没有可用的配置，请添加配置。</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -144,7 +191,7 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Trash } from "lucide-vue-next";
+import { Trash, RefreshCw, Megaphone, BookOpen } from "lucide-vue-next";
 import { useTranslation } from "../composables/useTranslation";
 
 const { t } = useTranslation();
@@ -395,6 +442,42 @@ const restartCore = async () => {
     }
 };
 
+// 功能按钮点击处理
+const showVersionUpdate = async () => {
+    const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+    
+    new WebviewWindow('version-update', {
+        url: '/version-update',
+        title: t('home.versionUpdate').value,
+        width: 800,
+        height: 600,
+        center: true,
+        resizable: true,
+        minWidth: 600,
+        minHeight: 400
+    });
+};
+
+const showAnnouncement = async () => {
+    const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+    
+    new WebviewWindow('announcement', {
+        url: '/announcement-window',
+        title: t('announcement.title').value,
+        width: 900,
+        height: 700,
+        center: true,
+        resizable: true,
+        minWidth: 700,
+        minHeight: 500
+    });
+};
+
+const showTutorial = () => {
+    console.log("显示教程文档");
+    // TODO: 实现教程文档功能
+};
+
 // 生命周期
 onMounted(async () => {
     loadConfigs();
@@ -441,8 +524,7 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
-.top-panel,
-.bottom-panel {
+.top-panel {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -450,15 +532,38 @@ onUnmounted(() => {
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-}
-
-.top-panel {
     min-height: 60px;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
-.bottom-panel {
+.bottom-panels-container {
     flex: 1;
+    display: flex;
+    gap: 16px;
     min-height: 0;
+}
+
+.left-panel,
+.right-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.left-panel {
+    flex: 2;
+}
+
+.right-panel {
+    flex: 3;
 }
 
 .panel-content {
@@ -468,6 +573,76 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
 }
+
+.section-header {
+  margin-bottom: 12px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+/* 功能按钮样式 */
+.feature-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  isolation: isolate;
+}
+
+.feature-button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: left;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.feature-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #333;
+}
+
+.feature-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+.feature-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+
 
 /* 上方面板样式 */
 .status-control-container {
@@ -712,7 +887,8 @@ onUnmounted(() => {
 /* 深色模式样式 */
 @media (prefers-color-scheme: dark) {
     .top-panel,
-    .bottom-panel {
+    .left-panel,
+    .right-panel {
         background: rgba(0, 0, 0, 0.8);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
@@ -755,6 +931,43 @@ onUnmounted(() => {
 
     .empty-text {
         color: #ccc;
+    }
+
+    .section-title {
+        color: #fff;
+    }
+
+    .feature-button {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .feature-icon {
+        background: rgba(0, 0, 0, 0.3);
+        color: #fff;
+    }
+
+    .feature-title {
+        color: #fff;
+    }
+
+    .feature-desc {
+        color: #ccc;
+    }
+
+    .version-button:hover .feature-icon {
+        background: rgba(33, 150, 243, 0.3);
+    }
+
+    .announcement-button:hover .feature-icon {
+        background: rgba(255, 152, 0, 0.3);
+    }
+
+    .tutorial-button:hover .feature-icon {
+        background: rgba(76, 175, 80, 0.3);
     }
 }
 
