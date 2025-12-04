@@ -53,8 +53,11 @@ class AnnouncementHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b"info.json not found")
                 logger.warning("info.json not found")
 
-        # Handle /get-announcement route
-        elif self.path == "/get-announcement":
+        # Handle /get-announcement/<lang> route
+        elif self.path.startswith("/get-announcement/"):
+            # Extract language from path
+            lang = self.path.split("/")[-1]
+            
             # Set response headers
             self.send_response(200)
             self.send_header("Content-type", "application/json")
@@ -62,28 +65,64 @@ class AnnouncementHandler(BaseHTTPRequestHandler):
 
             # Read files from the announces directory
             announces_dir = os.path.join(os.path.dirname(__file__), "announces")
-            announcements = {}
+            announcements = []
 
-            if os.path.exists(announces_dir):
-                # Iterate through language directories (zh, en)
-                for lang in os.listdir(announces_dir):
-                    lang_dir = os.path.join(announces_dir, lang)
-                    if os.path.isdir(lang_dir):
-                        announcements[lang] = []
-                        for filename in os.listdir(lang_dir):
-                            if filename.endswith(".md"):
-                                filepath = os.path.join(lang_dir, filename)
-                                with open(filepath, "r", encoding="utf-8") as file:
-                                    content = file.read()
-                                announcements[lang].append(
-                                    {"name": filename.replace(".md", ""), "content": content}
-                                )
+            lang_dir = os.path.join(announces_dir, lang)
+            if os.path.exists(lang_dir) and os.path.isdir(lang_dir):
+                temp_announcements = []
+                
+                for filename in os.listdir(lang_dir):
+                    if filename.endswith(".md"):
+                        filepath = os.path.join(lang_dir, filename)
+                        with open(filepath, "r", encoding="utf-8") as file:
+                            content = file.read()
+                        
+                        # Parse frontmatter
+                        title = filename.replace(".md", "")
+                        order = 999  # Default order
+                        markdown_content = content
+                        
+                        if content.startswith("---"):
+                            parts = content.split("---", 2)
+                            if len(parts) >= 3:
+                                frontmatter = parts[1].strip()
+                                markdown_content = parts[2].strip()
+                                
+                                # Parse frontmatter fields
+                                for line in frontmatter.split("\n"):
+                                    if ":" in line:
+                                        key, value = line.split(":", 1)
+                                        key = key.strip()
+                                        value = value.strip()
+                                        if key == "title":
+                                            title = value
+                                        elif key == "order":
+                                            try:
+                                                order = int(value)
+                                            except ValueError:
+                                                pass
+                        
+                        temp_announcements.append({
+                            "title": title,
+                            "content": markdown_content,
+                            "order": order
+                        })
+                
+                # Sort by order
+                temp_announcements.sort(key=lambda x: x["order"])
+                
+                # Remove order field from final output
+                for announcement in temp_announcements:
+                    announcements.append({
+                        "title": announcement["title"],
+                        "content": announcement["content"]
+                    })
 
             # Write the JSON response with ensure_ascii=False to prevent \u escaping
             self.wfile.write(
                 json.dumps(announcements, ensure_ascii=False).encode("utf-8")
             )
-            logger.info(f"Served announcements for {len(announcements)} languages")
+            logger.info(f"Served {len(announcements)} announcements for language: {lang}")
 
         # Handle /get-latest-version route
         elif self.path == "/get-latest-version":

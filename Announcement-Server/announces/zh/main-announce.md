@@ -1,3 +1,8 @@
+---
+title: 长期公告
+order: 999
+---
+
 ## StarRailAssistant Community Edition
 
 此项目由 @EveGlowLuna 开发，由社区维护（虽然原项目也由社区维护）

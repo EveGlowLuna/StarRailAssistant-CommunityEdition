@@ -1,3 +1,8 @@
+---
+title: v0.1.0 更新公告
+order: 1
+---
+
 ## StarRailAssistant Community Edition v0.1.0
 
 此为SRA-CE的第一个发布版本

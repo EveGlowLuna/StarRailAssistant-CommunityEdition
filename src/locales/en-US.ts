@@ -372,14 +372,15 @@ export default {
 
   // Announcement
   announcement: {
-    title: 'Announcement Center',
+    title: 'Announcements',
     refresh: 'Refresh',
     mainAnnouncement: 'Main Announcement',
     releaseAnnouncement: 'Latest Release',
     otherAnnouncements: 'Other Announcements',
     loading: 'Loading...',
     error: 'Failed to load announcements: If you are not using a VPN, this is not your fault. The server may be down or under attack.',
-    retry: 'Retry'
+    retry: 'Retry',
+    noAnnouncements: 'No announcements available'
   },
 
   // Settings

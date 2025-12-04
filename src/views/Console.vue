@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, watch, onBeforeUnmount } from "vue";
+import { ref, computed, nextTick, onMounted, onActivated, watch, onBeforeUnmount } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
@@ -333,6 +333,26 @@ onMounted(async () => {
     if (messagesContainer.value) {
         messagesContainer.value.addEventListener('scroll', handleScroll);
     }
+});
+
+// 当页面被 keep-alive 激活时
+onActivated(() => {
+    // 重置用户滚动状态
+    isUserScrolling.value = false;
+    
+    // 使用 setTimeout 确保在下一个事件循环中执行
+    setTimeout(() => {
+        if (messagesContainer.value) {
+            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+        }
+    }, 0);
+    
+    // 再次确保滚动（有时需要多次尝试）
+    setTimeout(() => {
+        if (messagesContainer.value) {
+            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+        }
+    }, 50);
 });
 
 onBeforeUnmount(() => {

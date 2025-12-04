@@ -42,7 +42,11 @@
     <!-- 主内容区域包装器 -->
     <div class="main-wrapper">
       <main class="main-content">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <keep-alive>
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </main>
     </div>
   </div>

@@ -13,99 +13,43 @@
                 </button>
             </div>
 
-            <div class="announcements-list" v-if="!loading && !error">
-                <!-- 主要公告 -->
-                <div
-                    class="announcement-card main-announcement"
-                    v-if="mainAnnouncement"
-                >
-                    <div
-                        class="announcement-card-header"
-                        @click="toggleCard('main')"
-                    >
-                        <h3 class="announcement-name">{{ t('announcement.mainAnnouncement') }}</h3>
-                        <button class="expand-button">
-                            <ChevronDown v-if="expandedCards.main" :size="16" />
-                            <ChevronUp v-else :size="16" />
-                        </button>
-                    </div>
-                    <transition name="slide-fade">
+            <div class="announcements-layout" v-if="!loading && !error">
+                <!-- 左侧公告列表 -->
+                <div class="announcements-sidebar">
+                    <div class="sidebar-title">{{ t('announcement.title') }}</div>
+                    <div class="announcements-menu">
                         <div
-                            class="announcement-content"
-                            v-show="expandedCards.main"
+                            v-for="(announcement, index) in announcements"
+                            :key="index"
+                            class="menu-item"
+                            :class="{ active: selectedIndex === index }"
+                            @click="selectAnnouncement(index)"
                         >
-                            <vue3-markdown-it :source="mainAnnouncement.content" />
-                        </div>
-                    </transition>
-                </div>
-
-                <!-- 最新版本公告 -->
-                <div
-                    class="announcement-card release-announcement"
-                    v-if="releaseAnnouncement"
-                >
-                    <div
-                        class="announcement-card-header"
-                        @click="toggleCard('release')"
-                    >
-                        <h3 class="announcement-name">
-                            {{ t('announcement.releaseAnnouncement') }}
-                        </h3>
-                        <button class="expand-button">
-                            <ChevronDown v-if="expandedCards.release" :size="16" />
-                            <ChevronUp v-else :size="16" />
-                        </button>
-                    </div>
-                    <transition name="slide-fade">
-                        <div
-                            class="announcement-content"
-                            v-show="expandedCards.release"
-                        >
-                            <vue3-markdown-it
-                                :source="releaseAnnouncement.content"
-                            />
-                        </div>
-                    </transition>
-                </div>
-
-                <!-- 其他公告 -->
-                <div
-                    class="announcement-card other-announcements"
-                    v-if="otherAnnouncements.length > 0"
-                >
-                    <div
-                        class="announcement-card-header"
-                        @click="toggleCard('other')"
-                    >
-                        <h3 class="announcement-name">{{ t('announcement.otherAnnouncements') }}</h3>
-                        <button class="expand-button">
-                            <ChevronDown v-if="expandedCards.other" :size="16" />
-                            <ChevronUp v-else :size="16" />
-                        </button>
-                    </div>
-                    <transition name="slide-fade">
-                        <div
-                            class="announcement-content"
-                            v-show="expandedCards.other"
-                        >
-                            <div
-                                v-for="announcement in otherAnnouncements"
-                                :key="announcement.name"
-                                class="other-item"
-                            >
-                                <vue3-markdown-it :source="announcement.content" />
-                                <hr
-                                    v-if="
-                                        announcement !==
-                                        otherAnnouncements[
-                                            otherAnnouncements.length - 1
-                                        ]
-                                    "
-                                    class="divider"
-                                />
+                            <div class="menu-item-content">
+                                <span class="menu-item-title">{{ announcement.title }}</span>
                             </div>
                         </div>
-                    </transition>
+                    </div>
+                </div>
+
+                <!-- 右侧公告内容 -->
+                <div class="announcements-content">
+                    <div
+                        v-if="announcements.length > 0 && announcements[selectedIndex]"
+                        class="announcement-detail"
+                    >
+                        <div class="announcement-detail-header">
+                            <h2 class="announcement-detail-title">
+                                {{ announcements[selectedIndex].title }}
+                            </h2>
+                        </div>
+                        <div class="announcement-detail-content">
+                            <vue3-markdown-it :source="announcements[selectedIndex].content" />
+                        </div>
+                    </div>
+                    <div v-else class="no-announcement">
+                        {{ t('announcement.noAnnouncements') }}
+                    </div>
                 </div>
             </div>
 
@@ -134,29 +78,22 @@ import Vue3MarkdownIt from "vue3-markdown-it";
 import {
     RefreshCw,
     AlertCircle,
-    ChevronDown,
-    ChevronUp,
 } from "lucide-vue-next";
 import { useTranslation } from "../composables/useTranslation";
 
 const { t } = useTranslation();
 
 interface Announcement {
-    name: string;
+    title: string;
     content: string;
 }
 
 // 响应式数据
 const loading = ref(false);
 const error = ref<string | null>(null);
-const mainAnnouncement = ref<Announcement | null>(null);
-const releaseAnnouncement = ref<Announcement | null>(null);
-const otherAnnouncements = ref<Announcement[]>([]);
-const expandedCards = ref({
-    main: true,
-    release: true,
-    other: true,
-});
+const announcements = ref<Announcement[]>([]);
+const expandedCards = ref<Record<number, boolean>>({});
+const selectedIndex = ref<number>(0);
 
 // 方法
 const loadAnnouncements = async () => {
@@ -167,27 +104,18 @@ const loadAnnouncements = async () => {
         // 获取当前语言设置
         const currentLang = localStorage.getItem('language') || 'zh-CN';
         
-        const announcements = await invoke<Announcement[]>('get_announcements', { 
+        const result = await invoke<Announcement[]>('get_announcements', { 
             lang: currentLang 
         });
 
-        mainAnnouncement.value = null;
-        releaseAnnouncement.value = null;
-        otherAnnouncements.value = [];
-
-        announcements.forEach((announcement) => {
-            switch (announcement.name) {
-                case "main-announce":
-                    mainAnnouncement.value = announcement;
-                    break;
-                case "release-announce":
-                    releaseAnnouncement.value = announcement;
-                    break;
-                case "announces":
-                    otherAnnouncements.value.push(announcement);
-                    break;
-            }
-        });
+        announcements.value = result;
+        
+        // 初始化展开状态，默认展开第一个
+        expandedCards.value = {};
+        if (result.length > 0) {
+            expandedCards.value[0] = true;
+            selectedIndex.value = 0;
+        }
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : (typeof err === 'string' ? err : '加载公告失败');
         error.value = errorMsg;
@@ -197,8 +125,8 @@ const loadAnnouncements = async () => {
     }
 };
 
-const toggleCard = (cardType: "main" | "release" | "other") => {
-    expandedCards.value[cardType] = !expandedCards.value[cardType];
+const selectAnnouncement = (index: number) => {
+    selectedIndex.value = index;
 };
 
 const refreshAnnouncements = () => {
@@ -222,33 +150,18 @@ onMounted(() => {
 .announcement-container {
   height: 100%;
   padding: 16px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-.announcement-container::-webkit-scrollbar {
-    width: 8px;
-}
 
-.announcement-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 4px;
-}
-
-.announcement-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-.announcement-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
-}
 
 .announcement-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   padding: 16px 20px;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
@@ -256,6 +169,7 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .announcement-title {
@@ -332,164 +246,241 @@ onMounted(() => {
     transform: translateY(-5px);
 }
 
-.announcements-list {
+.announcements-layout {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-bottom: 16px;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.announcement-card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.announcement-card:last-child {
-    margin-bottom: 40px;
-}
-
-.announcement-card-header {
-  padding: 12px 16px;
+.announcements-sidebar {
+  width: 240px;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.announcement-card-header:hover {
-    background: rgba(255, 255, 255, 0.9);
-}
-
-.announcement-name {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #000;
-    flex: 1;
-}
-
-.announcement-content {
+.sidebar-title {
   padding: 16px;
+  font-size: 20px;
+  font-weight: 600;
   color: #000;
-  line-height: 1.6;
-  text-align: left;
-  margin: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.announcement-content :deep(h1),
-.announcement-content :deep(h2),
-.announcement-content :deep(h3),
-.announcement-content :deep(h4),
-.announcement-content :deep(h5),
-.announcement-content :deep(h6) {
+.announcements-menu {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.announcements-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.announcements-menu::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.announcements-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.announcements-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.menu-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.menu-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.menu-item.active {
+  background: rgba(0, 0, 0, 0.1);
+  border-left-color: #000;
+  color: #000;
+}
+
+.menu-item-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.announcements-content {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.announcements-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.announcements-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.announcements-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.announcements-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.announcement-detail-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.announcement-detail-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+}
+
+.announcement-detail-content {
+  color: #000;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+.no-announcement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.announcement-detail-content :deep(h1),
+.announcement-detail-content :deep(h2),
+.announcement-detail-content :deep(h3),
+.announcement-detail-content :deep(h4),
+.announcement-detail-content :deep(h5),
+.announcement-detail-content :deep(h6) {
     color: #000;
     margin-top: 1.5em;
-    margin-bottom: 0.5em;
-    text-align: left;
+    margin-bottom: 0.75em;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.announcement-detail-content :deep(h1):first-child,
+.announcement-detail-content :deep(h2):first-child,
+.announcement-detail-content :deep(h3):first-child {
     margin-top: 0;
 }
 
-.announcement-content :deep(h1):first-child,
-.announcement-content :deep(h2):first-child,
-.announcement-content :deep(h3):first-child,
-.announcement-content :deep(h4):first-child,
-.announcement-content :deep(h5):first-child,
-.announcement-content :deep(h6):first-child {
+.announcement-detail-content :deep(h2) {
+    font-size: 24px;
+}
+
+.announcement-detail-content :deep(h3) {
+    font-size: 20px;
+}
+
+.announcement-detail-content :deep(p) {
+    margin: 1em 0;
+    line-height: 1.8;
+}
+
+.announcement-detail-content :deep(p):first-child {
     margin-top: 0;
 }
 
-.announcement-content :deep(p) {
-    margin: 0.8em 0;
-    text-align: left;
-}
-
-.announcement-content :deep(p):first-child {
-    margin-top: 0;
-}
-
-.announcement-content :deep(ul),
-.announcement-content :deep(ol) {
+.announcement-detail-content :deep(ul),
+.announcement-detail-content :deep(ol) {
     margin: 1em 0;
     padding-left: 2em;
-    text-align: left;
 }
 
-.announcement-content :deep(ul):first-child,
-.announcement-content :deep(ol):first-child {
-    margin-top: 0;
+.announcement-detail-content :deep(li) {
+    margin: 0.5em 0;
+    line-height: 1.6;
 }
 
-.announcement-content :deep(li) {
-    margin: 0.3em 0;
-    text-align: left;
+.announcement-detail-content :deep(a) {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-.announcement-content :deep(code) {
-    background: rgba(0, 0, 0, 0.1);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.9em;
+.announcement-detail-content :deep(a):hover {
+    color: #2563eb;
+    text-decoration: underline;
 }
 
-.announcement-content :deep(pre) {
+.announcement-detail-content :deep(code) {
     background: rgba(0, 0, 0, 0.05);
-    padding: 1em;
-    border-radius: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'Consolas', 'Monaco', monospace;
+    color: #e11d48;
+}
+
+.announcement-detail-content :deep(pre) {
+    background: rgba(0, 0, 0, 0.05);
+    color: #000;
+    padding: 1.25em;
+    border-radius: 8px;
     overflow-x: auto;
-    margin: 1em 0;
-    text-align: left;
+    margin: 1.5em 0;
 }
 
-.announcement-content :deep(pre):first-child {
-    margin-top: 0;
-}
-
-.announcement-content :deep(pre code) {
+.announcement-detail-content :deep(pre code) {
     background: none;
     padding: 0;
+    color: inherit;
 }
 
-.other-item {
-    margin-bottom: 1.5em;
-    text-align: left;
+.announcement-detail-content :deep(blockquote) {
+    border-left: 4px solid rgba(0, 0, 0, 0.3);
+    padding-left: 1em;
+    margin: 1.5em 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-style: italic;
 }
 
-.divider {
+.announcement-detail-content :deep(hr) {
     border: none;
     height: 1px;
     background: rgba(0, 0, 0, 0.1);
     margin: 2em 0;
-}
-
-.expand-button {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.expand-button:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: #000;
 }
 
 .loading-state,
@@ -498,14 +489,13 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 300px;
+    flex: 1;
     gap: 16px;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    margin: 20px;
 }
 
 .loading-icon,
@@ -535,115 +525,15 @@ onMounted(() => {
     transform: translateY(-1px);
 }
 
-.main-announcement {
-    border-left: 4px solid #4caf50;
-}
-
-.main-announcement .announcement-card-header {
-    background: rgba(76, 175, 80, 0.1);
-}
-
-.release-announcement {
-  border-left: 4px solid #ff9800;
-}
-
-.release-announcement .announcement-card-header {
-  background: rgba(255, 152, 0, 0.1);
-}
-
-.other-announcements {
-    border-left: 4px solid #2196f3;
-}
-
-.other-announcements .announcement-card-header {
-    background: rgba(33, 150, 243, 0.1);
-}
-
 @media (prefers-color-scheme: dark) {
-    .announcement-window {
-        background: url('../assets/background-lt.jpg') no-repeat center center;
-        background-size: cover;
-    }
-
-    .announcement-container {
-        color: #fff;
-    }
-
     .announcement-header {
         background: rgba(0, 0, 0, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .announcement-title {
-        color: #fff;
-    }
-
-    .announcement-card {
-        background: rgba(0, 0, 0, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .announcement-card-header {
-        background: rgba(255, 255, 255, 0.1);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        color: #fff;
-    }
-
-    .announcement-card-header:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    .loading-state,
-    .error-state {
-        background: rgba(0, 0, 0, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .main-announcement .announcement-card-header {
-        background: rgba(76, 175, 80, 0.2);
-    }
-
-    .release-announcement .announcement-card-header {
-        background: rgba(255, 152, 0, 0.2);
-    }
-
-    .other-announcements .announcement-card-header {
-        background: rgba(33, 150, 243, 0.2);
-    }
-
-    .announcement-name {
-        color: #fff;
-    }
-
-    .announcement-content {
-        color: #fff;
-    }
-
-    .announcement-content :deep(h1),
-    .announcement-content :deep(h2),
-    .announcement-content :deep(h3),
-    .announcement-content :deep(h4),
-    .announcement-content :deep(h5),
-    .announcement-content :deep(h6) {
-        color: #fff;
-    }
-
-    .announcement-content :deep(code) {
-        background: rgba(255, 255, 255, 0.1);
-    }
-
-    .announcement-content :deep(pre) {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .divider {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    .loading-text,
-    .error-text {
-        color: #ccc;
+        color: #f1f5f9;
     }
 
     .refresh-button {
@@ -655,13 +545,118 @@ onMounted(() => {
         background: rgba(255, 255, 255, 0.2);
     }
 
-    .expand-button {
-        color: #ccc;
+    .announcements-sidebar {
+        background: rgba(0, 0, 0, 0.8);
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .expand-button:hover {
+    .sidebar-title {
+        color: #fff;
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .menu-item {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .menu-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .menu-item.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-left-color: #fff;
+        color: #fff;
+    }
+
+    .announcements-menu::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .announcements-menu::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .announcements-menu::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .announcements-content {
+        background: rgba(0, 0, 0, 0.8);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .announcement-detail-title {
+        color: #f1f5f9;
+    }
+
+    .announcement-detail-content {
+        color: #cbd5e1;
+    }
+
+    .announcement-detail-content :deep(h1),
+    .announcement-detail-content :deep(h2),
+    .announcement-detail-content :deep(h3),
+    .announcement-detail-content :deep(h4),
+    .announcement-detail-content :deep(h5),
+    .announcement-detail-content :deep(h6) {
+        color: #f1f5f9;
+    }
+
+    .announcement-detail-content :deep(a) {
+        color: #60a5fa;
+    }
+
+    .announcement-detail-content :deep(a):hover {
+        color: #93c5fd;
+    }
+
+    .announcement-detail-content :deep(code) {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fca5a5;
+    }
+
+    .announcement-detail-content :deep(blockquote) {
+        border-left-color: #60a5fa;
+        color: #94a3b8;
+    }
+
+    .announcement-detail-content :deep(hr) {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .announcement-detail-header {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .no-announcement {
+        color: #94a3b8;
+    }
+
+    .loading-state,
+    .error-state {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .loading-text,
+    .error-text {
+        color: #cbd5e1;
+    }
+
+    .loading-icon,
+    .error-icon {
+        color: #94a3b8;
+    }
+
+    .refresh-button {
         background: rgba(255, 255, 255, 0.1);
         color: #fff;
+    }
+
+    .refresh-button:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
     }
 
     .retry-button {
@@ -671,6 +666,15 @@ onMounted(() => {
 
     .retry-button:hover {
         background: rgba(255, 255, 255, 0.2);
+    }
+
+    .announcement-header {
+        background: rgba(15, 23, 42, 0.95);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .announcement-title {
+        color: #f1f5f9;
     }
 }
 </style>

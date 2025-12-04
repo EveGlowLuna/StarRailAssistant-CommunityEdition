@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import Announcement from '../views/Announcement.vue'
 import AnnouncementWindow from '../views/AnnouncementWindow.vue'
 import VersionUpdateWindow from '../views/VersionUpdateWindow.vue'
 import Tasks from '../views/Tasks.vue'
@@ -13,11 +12,6 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
-  },
-  {
-    path: '/announcement',
-    name: 'Announcement',
-    component: Announcement
   },
   {
     path: '/announcement-window',
