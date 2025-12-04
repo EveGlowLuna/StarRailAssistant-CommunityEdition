@@ -163,13 +163,13 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 16px;
   padding: 16px 20px;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
 }
 
 .announcement-title {
@@ -528,7 +528,7 @@ onMounted(() => {
 @media (prefers-color-scheme: dark) {
     .announcement-header {
         background: rgba(0, 0, 0, 0.8);
-        border-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
@@ -547,7 +547,8 @@ onMounted(() => {
 
     .announcements-sidebar {
         background: rgba(0, 0, 0, 0.8);
-        border-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .sidebar-title {
@@ -668,13 +669,6 @@ onMounted(() => {
         background: rgba(255, 255, 255, 0.2);
     }
 
-    .announcement-header {
-        background: rgba(15, 23, 42, 0.95);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
 
-    .announcement-title {
-        color: #f1f5f9;
-    }
 }
 </style>
