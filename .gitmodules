@@ -1,0 +1,3 @@
+[submodule "SRA-CE-cil"]
+	path = SRA-CE-cil
+	url = https://github.com/EveGlowLuna/SRA-CE-Cli.git
