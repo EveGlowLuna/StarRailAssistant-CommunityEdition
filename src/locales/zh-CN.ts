@@ -404,28 +404,32 @@ export default {
       confidence: '识图置信度阈值'
     },
     
-    app: {
-      title: '应用设置',
-      channel: '应用渠道',
-      stable: '稳定版',
-      beta: '测试版',
-      allowNotifications: '允许通知',
-      allowSystemNotifications: '允许系统通知',
-      allowEmailNotifications: '允许邮件通知',
-      enableStartupLaunch: '开机自启动',
-      enableMinimizeToTray: '最小化到托盘'
+    hotkeys: {
+      title: '游戏内快捷键',
+      clickToSet: '点击输入框设置快捷键',
+      pressKey: '按键盘设置快捷键',
+      activity: '活动',
+      chronicle: '纪行',
+      warp: '卡池',
+      guide: '指南',
+      map: '地图',
+      technique: '秘技'
     },
-    
-    network: {
-      title: '网络设置',
-      proxy: '代理设置',
-      addProxy: '添加代理',
-      removeProxy: '移除'
-    },
-    
-    resetConfirm: '确定要重置所有设置为默认值吗？',
     
     notifications: {
+      title: '通知',
+      allowNotifications: '允许通知',
+      allowSystemNotifications: '系统通知',
+      allowEmailNotifications: '邮件通知',
+      smtpSettings: 'SMTP设置',
+      smtpServer: 'SMTP服务器',
+      smtpPort: 'SMTP端口',
+      emailSender: '发送邮件地址',
+      emailSenderPlaceholder: '例：123456@qq.com',
+      emailAuthCode: '邮件授权码',
+      emailAuthCodePlaceholder: '例：123456',
+      emailReceiver: '接收邮件地址',
+      emailReceiverPlaceholder: '例：123456@qq.com',
       settingsSaved: '设置保存成功',
       saveSettingsFailed: '保存设置失败',
       wallpaperSet: '壁纸设置成功',
@@ -433,7 +437,15 @@ export default {
       wallpaperReset: '壁纸已重置为默认',
       resetWallpaperFailed: '重置壁纸失败',
       unknownError: '未知错误'
-    }
+    },
+    
+    app: {
+      title: '应用设置',
+      enableStartupLaunch: '开机自启动',
+      enableMinimizeToTray: '最小化到托盘'
+    },
+    
+    resetConfirm: '确定要重置所有设置为默认值吗？'
   },
 
   // 通用

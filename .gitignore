@@ -1,6 +1,6 @@
 ﻿**/data/
 **/log/
-/.venv/
+**/.venv/
 /.vscode/
 /setup/output/
 **/__pycache__/

@@ -66,14 +66,14 @@
           <div class="setting-item">
             <label class="setting-label">{{ t('settings.interface.zoom') }}</label>
             <input
-              v-model="settings.zoom"
-              type="range"
-              min="0.5"
-              max="2.0"
-              step="0.1"
-              class="setting-slider"
+              v-model.number="settings.zoom"
+              type="number"
+              min="50"
+              max="200"
+              step="5"
+              class="setting-input"
             />
-            <span class="slider-value">{{ settings.zoom.toFixed(1) }}x</span>
+            <span class="input-suffix">%</span>
           </div>
           <div class="setting-item">
             <label class="setting-label">{{ t('settings.interface.confidence') }}</label>
@@ -90,21 +90,129 @@
         </div>
       </div>
 
-      <!-- 应用设置 -->
+      <!-- 游戏内快捷键 -->
       <div class="settings-section">
         <div class="section-header">
           <Settings as="div" class="section-icon" :size="20" />
-          <h3 class="section-title">{{ t('settings.app.title') }}</h3>
+          <h3 class="section-title">{{ t('settings.hotkeys.title') }}</h3>
         </div>
         <div class="section-content">
-          <div class="setting-item">
-            <label class="setting-label">{{ t('settings.app.channel') }}</label>
-            <CustomDropdown
-              v-model="settings.app_channel"
-              :options="appChannelOptions"
-              placeholder=""
-            />
+          <div class="setting-note">
+            <Info :size="16" class="note-icon" />
+            <span class="note-text">{{ t('settings.hotkeys.clickToSet') }}</span>
           </div>
+          <div class="setting-item hotkey-item">
+            <label class="setting-label">{{ t('settings.hotkeys.activity') }}</label>
+            <div class="hotkey-controls">
+              <input
+                :value="settings.activity_hotkey"
+                type="text"
+                class="setting-input hotkey-input"
+                :class="{ 'listening': listeningKey === 'activity_hotkey' }"
+                :placeholder="getHotkeyPlaceholder('activity_hotkey', 'F1')"
+                readonly
+                @click="startListening('activity_hotkey')"
+              />
+              <button class="control-button hotkey-reset-button" @click="resetHotkey('activity_hotkey', 'F1')">
+                <RotateCcw class="button-icon" :size="14" />
+              </button>
+            </div>
+          </div>
+          <div class="setting-item hotkey-item">
+            <label class="setting-label">{{ t('settings.hotkeys.chronicle') }}</label>
+            <div class="hotkey-controls">
+              <input
+                :value="settings.chronicle_hotkey"
+                type="text"
+                class="setting-input hotkey-input"
+                :class="{ 'listening': listeningKey === 'chronicle_hotkey' }"
+                :placeholder="getHotkeyPlaceholder('chronicle_hotkey', 'F2')"
+                readonly
+                @click="startListening('chronicle_hotkey')"
+              />
+              <button class="control-button hotkey-reset-button" @click="resetHotkey('chronicle_hotkey', 'F2')">
+                <RotateCcw class="button-icon" :size="14" />
+              </button>
+            </div>
+          </div>
+          <div class="setting-item hotkey-item">
+            <label class="setting-label">{{ t('settings.hotkeys.warp') }}</label>
+            <div class="hotkey-controls">
+              <input
+                :value="settings.warp_hotkey"
+                type="text"
+                class="setting-input hotkey-input"
+                :class="{ 'listening': listeningKey === 'warp_hotkey' }"
+                :placeholder="getHotkeyPlaceholder('warp_hotkey', 'F3')"
+                readonly
+                @click="startListening('warp_hotkey')"
+              />
+              <button class="control-button hotkey-reset-button" @click="resetHotkey('warp_hotkey', 'F3')">
+                <RotateCcw class="button-icon" :size="14" />
+              </button>
+            </div>
+          </div>
+          <div class="setting-item hotkey-item">
+            <label class="setting-label">{{ t('settings.hotkeys.guide') }}</label>
+            <div class="hotkey-controls">
+              <input
+                :value="settings.guide_hotkey"
+                type="text"
+                class="setting-input hotkey-input"
+                :class="{ 'listening': listeningKey === 'guide_hotkey' }"
+                :placeholder="getHotkeyPlaceholder('guide_hotkey', 'F4')"
+                readonly
+                @click="startListening('guide_hotkey')"
+              />
+              <button class="control-button hotkey-reset-button" @click="resetHotkey('guide_hotkey', 'F4')">
+                <RotateCcw class="button-icon" :size="14" />
+              </button>
+            </div>
+          </div>
+          <div class="setting-item hotkey-item">
+            <label class="setting-label">{{ t('settings.hotkeys.map') }}</label>
+            <div class="hotkey-controls">
+              <input
+                :value="settings.map_hotkey"
+                type="text"
+                class="setting-input hotkey-input"
+                :class="{ 'listening': listeningKey === 'map_hotkey' }"
+                :placeholder="getHotkeyPlaceholder('map_hotkey', 'M')"
+                readonly
+                @click="startListening('map_hotkey')"
+              />
+              <button class="control-button hotkey-reset-button" @click="resetHotkey('map_hotkey', 'M')">
+                <RotateCcw class="button-icon" :size="14" />
+              </button>
+            </div>
+          </div>
+          <div class="setting-item hotkey-item">
+            <label class="setting-label">{{ t('settings.hotkeys.technique') }}</label>
+            <div class="hotkey-controls">
+              <input
+                :value="settings.technique_hotkey"
+                type="text"
+                class="setting-input hotkey-input"
+                :class="{ 'listening': listeningKey === 'technique_hotkey' }"
+                :placeholder="getHotkeyPlaceholder('technique_hotkey', 'E')"
+                readonly
+                @click="startListening('technique_hotkey')"
+              />
+              <button class="control-button hotkey-reset-button" @click="resetHotkey('technique_hotkey', 'E')">
+                <RotateCcw class="button-icon" :size="14" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 通知设置 -->
+      <div class="settings-section">
+        <div class="section-header">
+          <Globe class="section-icon" :size="20" />
+          <h3 class="section-title">{{ t('settings.notifications.title') }}</h3>
+        </div>
+        <div class="section-content">
           <div class="setting-item checkbox-item">
             <input
               v-model="settings.allow_notifications"
@@ -112,7 +220,7 @@
               id="allow-notifications"
               class="setting-checkbox"
             />
-            <label for="allow-notifications" class="checkbox-label">{{ t('settings.app.allowNotifications') }}</label>
+            <label for="allow-notifications" class="checkbox-label">{{ t('settings.notifications.allowNotifications') }}</label>
           </div>
           <div class="setting-item checkbox-item">
             <input
@@ -121,7 +229,7 @@
               id="allow-system-notifications"
               class="setting-checkbox"
             />
-            <label for="allow-system-notifications" class="checkbox-label">{{ t('settings.app.allowSystemNotifications') }}</label>
+            <label for="allow-system-notifications" class="checkbox-label">{{ t('settings.notifications.allowSystemNotifications') }}</label>
           </div>
           <div class="setting-item checkbox-item">
             <input
@@ -130,8 +238,68 @@
               id="allow-email-notifications"
               class="setting-checkbox"
             />
-            <label for="allow-email-notifications" class="checkbox-label">{{ t('settings.app.allowEmailNotifications') }}</label>
+            <label for="allow-email-notifications" class="checkbox-label">{{ t('settings.notifications.allowEmailNotifications') }}</label>
           </div>
+          
+          <!-- SMTP设置 -->
+          <div v-if="settings.allow_email_notifications" class="smtp-settings">
+            <h4 class="smtp-title">{{ t('settings.notifications.smtpSettings') }}</h4>
+            <div class="setting-item">
+              <label class="setting-label">{{ t('settings.notifications.smtpServer') }}</label>
+              <input
+                v-model="settings.smtp_server"
+                type="text"
+                class="setting-input"
+                placeholder="smtp.qq.com"
+              />
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">{{ t('settings.notifications.smtpPort') }}</label>
+              <input
+                v-model.number="settings.smtp_port"
+                type="number"
+                class="setting-input"
+                placeholder="465"
+              />
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">{{ t('settings.notifications.emailSender') }}</label>
+              <input
+                v-model="settings.email_sender"
+                type="text"
+                class="setting-input"
+                :placeholder="t('settings.notifications.emailSenderPlaceholder').value"
+              />
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">{{ t('settings.notifications.emailAuthCode') }}</label>
+              <input
+                v-model="settings.email_auth_code"
+                type="password"
+                class="setting-input"
+                :placeholder="t('settings.notifications.emailAuthCodePlaceholder').value"
+              />
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">{{ t('settings.notifications.emailReceiver') }}</label>
+              <input
+                v-model="settings.email_receiver"
+                type="text"
+                class="setting-input"
+                :placeholder="t('settings.notifications.emailReceiverPlaceholder').value"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 应用设置 -->
+      <div class="settings-section">
+        <div class="section-header">
+          <Settings as="div" class="section-icon" :size="20" />
+          <h3 class="section-title">{{ t('settings.app.title') }}</h3>
+        </div>
+        <div class="section-content">
           <div class="setting-item checkbox-item">
             <input
               v-model="settings.enable_startup_launch"
@@ -149,46 +317,6 @@
               class="setting-checkbox"
             />
             <label for="enable-minimize-to-tray" class="checkbox-label">{{ t('settings.app.enableMinimizeToTray') }}</label>
-          </div>
-        </div>
-      </div>
-
-      <!-- 网络设置 -->
-      <div class="settings-section">
-        <div class="section-header">
-          <Globe class="section-icon" :size="20" />
-          <h3 class="section-title">{{ t('settings.network.title') }}</h3>
-        </div>
-        <div class="section-content">
-          <div class="setting-item proxy-setting">
-            <label class="setting-label">{{ t('settings.network.proxy') }}</label>
-            <div class="proxy-controls">
-              <div class="proxies-list">
-                <div
-                  v-for="(_, index) in settings.proxies"
-                  :key="index"
-                  class="proxy-item"
-                >
-                  <input
-                    v-model="settings.proxies[index]"
-                    type="text"
-                    class="proxy-input"
-                    placeholder="https://proxy.example.com/"
-                  />
-                  <button
-                    class="proxy-remove"
-                    @click="removeProxy(index)"
-                    :disabled="settings.proxies.length <= 1"
-                  >
-                    <Trash2 :size="14" />
-                  </button>
-                </div>
-              </div>
-              <button class="control-button add-button" @click="addProxy">
-                <Plus class="button-icon" :size="16" />
-                {{ t('settings.network.addProxy') }}
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -224,8 +352,6 @@ import {
   Settings,
   Globe,
   Image,
-  Plus,
-  Trash2,
   Info
 } from 'lucide-vue-next'
 import CustomDropdown from '../components/CustomDropdown.vue'
@@ -238,11 +364,20 @@ interface AppSettings {
   language: number
   zoom: number
   confidence_threshold: number
-  app_channel: number
-  proxies: string[]
   allow_notifications: boolean
   allow_system_notifications: boolean
   allow_email_notifications: boolean
+  smtp_server: string
+  smtp_port: number
+  email_sender: string
+  email_auth_code: string
+  email_receiver: string
+  activity_hotkey: string
+  chronicle_hotkey: string
+  warp_hotkey: string
+  guide_hotkey: string
+  map_hotkey: string
+  technique_hotkey: string
   enable_startup_launch: boolean
   enable_minimize_to_tray: boolean
   wallpaper_path: string | null
@@ -252,19 +387,29 @@ interface AppSettings {
 const originalSettings = ref<AppSettings | null>(null)
 const settings = reactive<AppSettings>({
   language: 1,
-  zoom: 1.0,
+  zoom: 125,
   confidence_threshold: 0.9,
-  app_channel: 0,
-  proxies: ['https://tvv.tw/'],
   allow_notifications: true,
   allow_system_notifications: true,
   allow_email_notifications: false,
+  smtp_server: 'smtp.qq.com',
+  smtp_port: 465,
+  email_sender: '',
+  email_auth_code: '',
+  email_receiver: '',
+  activity_hotkey: 'F1',
+  chronicle_hotkey: 'F2',
+  warp_hotkey: 'F3',
+  guide_hotkey: 'F4',
+  map_hotkey: 'M',
+  technique_hotkey: 'E',
   enable_startup_launch: false,
   enable_minimize_to_tray: false,
   wallpaper_path: null
 })
 
 const showResetModal = ref(false)
+const listeningKey = ref<string | null>(null)
 
 // 计算属性
 const hasChanges = computed(() => {
@@ -278,10 +423,7 @@ const languageNote = computed(() => {
     : '使用该程序进行自动化需要您游戏界面设置为简体中文'
 })
 
-const appChannelOptions = computed(() => [
-  { label: t('settings.app.stable').value, value: 0 },
-  { label: t('settings.app.beta').value, value: 1 }
-])
+
 
 // 方法
 const onLanguageChange = (value: string | number) => {
@@ -325,13 +467,22 @@ const resetSettings = () => {
 const confirmReset = () => {
   Object.assign(settings, {
     language: 1,
-    zoom: 1.0,
+    zoom: 125,
     confidence_threshold: 0.9,
-    app_channel: 0,
-    proxies: ['https://tvv.tw/'],
     allow_notifications: true,
     allow_system_notifications: true,
     allow_email_notifications: false,
+    smtp_server: 'smtp.qq.com',
+    smtp_port: 465,
+    email_sender: '',
+    email_auth_code: '',
+    email_receiver: '',
+    activity_hotkey: 'F1',
+    chronicle_hotkey: 'F2',
+    warp_hotkey: 'F3',
+    guide_hotkey: 'F4',
+    map_hotkey: 'M',
+    technique_hotkey: 'E',
     enable_startup_launch: false,
     enable_minimize_to_tray: false,
     wallpaper_path: null
@@ -444,14 +595,96 @@ const removeWallpaperFromBackground = () => {
   }
 }
 
-const addProxy = () => {
-  settings.proxies.push('')
+// 快捷键监听相关方法
+const getHotkeyPlaceholder = (key: string, defaultKey: string) => {
+  return listeningKey.value === key ? t('settings.hotkeys.pressKey').value : defaultKey
 }
 
-const removeProxy = (index: number) => {
-  if (settings.proxies.length > 1) {
-    settings.proxies.splice(index, 1)
+const startListening = (key: string) => {
+  listeningKey.value = key
+  // 添加全局键盘监听
+  window.addEventListener('keyup', handleKeyPress)
+  window.addEventListener('click', handleClickOutside, true)
+}
+
+const stopListening = () => {
+  listeningKey.value = null
+  window.removeEventListener('keyup', handleKeyPress)
+  window.removeEventListener('click', handleClickOutside, true)
+}
+
+const handleKeyPress = (event: KeyboardEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+  
+  if (!listeningKey.value) return
+  
+  // 使用 event.code 获取物理按键代码（如 "Digit3", "KeyA", "F1" 等）
+  // 这样可以得到类似源码中的 "D3" 效果
+  let keyName = event.code
+  
+  // 处理特殊按键映射，使其更友好
+  if (keyName.startsWith('Digit')) {
+    // Digit0-9 -> D0-D9
+    keyName = 'D' + keyName.substring(5)
+  } else if (keyName.startsWith('Key')) {
+    // KeyA-Z -> A-Z
+    keyName = keyName.substring(3)
+  } else if (keyName === 'Space') {
+    keyName = 'Space'
+  } else if (keyName === 'Minus') {
+    keyName = '-'
+  } else if (keyName === 'Equal') {
+    keyName = '='
+  } else if (keyName === 'BracketLeft') {
+    keyName = '['
+  } else if (keyName === 'BracketRight') {
+    keyName = ']'
+  } else if (keyName === 'Backslash') {
+    keyName = '\\'
+  } else if (keyName === 'Semicolon') {
+    keyName = ';'
+  } else if (keyName === 'Quote') {
+    keyName = "'"
+  } else if (keyName === 'Comma') {
+    keyName = ','
+  } else if (keyName === 'Period') {
+    keyName = '.'
+  } else if (keyName === 'Slash') {
+    keyName = '/'
+  } else if (keyName === 'Backquote') {
+    keyName = '`'
   }
+  // F1-F12, Enter, Escape 等保持原样
+  
+  // 更新设置
+  const key = listeningKey.value
+  if (key === 'activity_hotkey') settings.activity_hotkey = keyName
+  else if (key === 'chronicle_hotkey') settings.chronicle_hotkey = keyName
+  else if (key === 'warp_hotkey') settings.warp_hotkey = keyName
+  else if (key === 'guide_hotkey') settings.guide_hotkey = keyName
+  else if (key === 'map_hotkey') settings.map_hotkey = keyName
+  else if (key === 'technique_hotkey') settings.technique_hotkey = keyName
+  
+  // 停止监听
+  stopListening()
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  // 如果点击的不是快捷键输入框，则停止监听
+  if (!target.classList.contains('hotkey-input')) {
+    stopListening()
+  }
+}
+
+const resetHotkey = (key: string, defaultValue: string) => {
+  if (key === 'activity_hotkey') settings.activity_hotkey = defaultValue
+  else if (key === 'chronicle_hotkey') settings.chronicle_hotkey = defaultValue
+  else if (key === 'warp_hotkey') settings.warp_hotkey = defaultValue
+  else if (key === 'guide_hotkey') settings.guide_hotkey = defaultValue
+  else if (key === 'map_hotkey') settings.map_hotkey = defaultValue
+  else if (key === 'technique_hotkey') settings.technique_hotkey = defaultValue
 }
 
 // 生命周期
@@ -481,18 +714,18 @@ body.modal-open {
 }
 
 .settings-container::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--scrollbar-track);
   border-radius: 4px;
 }
 
 .settings-container::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
   transition: background-color 0.3s ease;
 }
 
 .settings-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--scrollbar-thumb-hover);
 }
 
 .settings-header {
@@ -501,10 +734,10 @@ body.modal-open {
   align-items: center;
   margin-bottom: 20px;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-secondary);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -513,7 +746,7 @@ body.modal-open {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #000;
+  color: var(--text-color);
 }
 
 .settings-actions {
@@ -566,10 +799,10 @@ body.modal-open {
 }
 
 .settings-section {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-secondary);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -580,19 +813,19 @@ body.modal-open {
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .section-icon {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .section-title {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #000;
+  color: var(--text-color);
 }
 
 .section-content {
@@ -626,7 +859,7 @@ body.modal-open {
 
 .note-text {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -634,22 +867,98 @@ body.modal-open {
   margin-bottom: 0;
 }
 
-
-
 .setting-label {
   width: 180px;
   font-size: 14px;
   font-weight: 500;
-  color: #000;
+  color: var(--text-color);
   flex-shrink: 0;
+}
+
+.setting-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.setting-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* 快捷键设置项特殊样式 */
+.hotkey-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hotkey-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hotkey-input {
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  font-weight: 500;
+  min-width: 120px;
+  max-width: 150px;
+  flex: 0 0 auto;
+}
+
+.hotkey-input:hover {
+  border-color: #007bff;
+  background: var(--bg-tertiary);
+}
+
+.hotkey-input.listening {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 152, 0, 0);
+  }
+}
+
+.hotkey-reset-button {
+  background: rgba(255, 152, 0, 0.8);
+  color: white;
+  padding: 8px;
+  min-width: auto;
+  flex-shrink: 0;
+}
+
+.hotkey-reset-button:hover {
+  background: rgba(255, 152, 0, 0.9);
+}
+
+.input-suffix {
+  margin-left: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
 .setting-select {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-secondary);
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--input-bg);
+  color: var(--text-color);
   font-size: 14px;
   transition: border-color 0.3s ease;
 }
@@ -667,7 +976,7 @@ body.modal-open {
 .slider-value {
   width: 50px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   text-align: right;
 }
 
@@ -685,7 +994,7 @@ body.modal-open {
 
 .checkbox-label {
   font-size: 14px;
-  color: #000;
+  color: var(--text-color);
   cursor: pointer;
 }
 
@@ -771,16 +1080,18 @@ body.modal-open {
   flex-shrink: 0;
 }
 
-/* 代理设置特殊样式 */
-.proxy-setting {
-  align-items: flex-start;
+/* SMTP设置样式 */
+.smtp-settings {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
-.proxy-controls {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.smtp-title {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 /* 自定义模态框样式 */
@@ -800,10 +1111,10 @@ body.modal-open {
 }
 
 .custom-modal {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg-tertiary);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0;
   min-width: 400px;
@@ -825,14 +1136,14 @@ body.modal-open {
 
 .modal-header {
   padding: 20px 24px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-title {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #000;
+  color: var(--text-color);
 }
 
 .modal-content {
@@ -842,7 +1153,7 @@ body.modal-open {
 .modal-content p {
   margin: 0;
   font-size: 14px;
-  color: #000;
+  color: var(--text-color);
   line-height: 1.5;
 }
 
@@ -882,83 +1193,5 @@ body.modal-open {
   background: rgba(244, 67, 54, 1);
 }
 
-/* 深色模式样式 */
-@media (prefers-color-scheme: dark) {
-  .settings-header,
-  .settings-section {
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .settings-title,
-  .section-title,
-  .setting-label,
-  .checkbox-label {
-    color: #fff;
-  }
-
-  .section-header {
-    background: rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .setting-select,
-  .proxy-input {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-  }
-
-  .slider-value {
-    color: #ccc;
-  }
-
-  .section-icon {
-    color: #ccc;
-  }
-
-  .setting-note {
-    background: rgba(33, 150, 243, 0.2);
-    border-left-color: #2196f3;
-  }
-
-  .note-text {
-    color: #ccc;
-  }
-
-  .settings-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .settings-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .settings-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  /* 深色模式下的模态框 */
-  .custom-modal {
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .modal-title {
-    color: #fff;
-  }
-
-  .modal-content p {
-    color: #fff;
-  }
-
-  .cancel-button {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-  }
-
-  .cancel-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-}
+/* 所有深色模式样式现在通过CSS变量自动处理 */
 </style>

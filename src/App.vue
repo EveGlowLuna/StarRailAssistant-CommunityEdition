@@ -55,19 +55,20 @@ const loadWallpaper = async () => {
   }
 }
 
-// 初始化语言
-const initLanguage = async () => {
+// 初始化应用设置
+const initAppSettings = async () => {
   try {
     const settings = await invoke<AppSettings>('load_app_settings')
+    // 设置语言
     setLocale(settings.language === 0 ? 'en-US' : 'zh-CN')
   } catch (error) {
-    // 如果加载失败，使用默认语言（中文）
+    // 如果加载失败，使用默认设置
     setLocale('zh-CN')
   }
 }
 
 onMounted(async () => {
-  await initLanguage()
+  await initAppSettings()
   loadWallpaper()
 })
 </script>
@@ -94,14 +95,48 @@ onMounted(async () => {
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  /* 浅色模式变量 */
+  --text-color: #000;
+  --text-secondary: #666;
+  --bg-color: #f6f6f6;
+  --bg-secondary: rgba(255, 255, 255, 0.8);
+  --bg-tertiary: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-secondary: rgba(0, 0, 0, 0.2);
+  --input-bg: #ffffff;
+  --input-text: #0f0f0f;
+  --button-active-bg: #e8e8e8;
+  --scrollbar-track: rgba(0, 0, 0, 0.05);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+
+  color: var(--text-color);
+  background-color: var(--bg-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+/* 深色模式（跟随系统） */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #fff;
+    --text-secondary: #ccc;
+    --bg-color: #2f2f2f;
+    --bg-secondary: rgba(0, 0, 0, 0.8);
+    --bg-tertiary: rgba(255, 255, 255, 0.1);
+    --border-color: rgba(255, 255, 255, 0.2);
+    --border-secondary: rgba(255, 255, 255, 0.2);
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-text: #ffffff;
+    --button-active-bg: #0f0f0f69;
+    --scrollbar-track: rgba(255, 255, 255, 0.05);
+    --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  }
 }
 
 .container {
@@ -151,8 +186,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
+  color: var(--input-text);
+  background-color: var(--input-bg);
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
@@ -164,9 +199,10 @@ button {
 button:hover {
   border-color: #396cd8;
 }
+
 button:active {
   border-color: #396cd8;
-  background-color: #e8e8e8;
+  background-color: var(--button-active-bg);
 }
 
 input,
@@ -176,26 +212,6 @@ button {
 
 #greet-input {
   margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
 }
 
 </style>

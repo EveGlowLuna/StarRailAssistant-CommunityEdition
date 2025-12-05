@@ -555,8 +555,9 @@ const moveTaskDown = (index: number) => {
   padding: 12px;
   margin-bottom: 8px;
   transition: all 0.3s ease;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
   align-items: center;
   position: relative;
 }
@@ -564,7 +565,6 @@ const moveTaskDown = (index: number) => {
 .task-item:hover {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
   border-color: rgba(0, 123, 255, 0.3);
 }
 
@@ -603,15 +603,12 @@ const moveTaskDown = (index: number) => {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-left: 12px;
   opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .task-item:hover .task-actions {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .move-button {
@@ -632,12 +629,7 @@ const moveTaskDown = (index: number) => {
 
 .move-button:hover:not(:disabled) {
   background: rgba(33, 150, 243, 1);
-  transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(33, 150, 243, 0.4);
-}
-
-.move-button:active:not(:disabled) {
-  transform: translateY(0);
 }
 
 .move-button:disabled {
@@ -670,12 +662,7 @@ const moveTaskDown = (index: number) => {
 
 .delete-task-button:hover {
   background: rgba(244, 67, 54, 1);
-  transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(244, 67, 54, 0.4);
-}
-
-.delete-task-button:active {
-  transform: translateY(0);
 }
 
 .delete-task-button svg {

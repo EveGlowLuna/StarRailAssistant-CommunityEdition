@@ -141,10 +141,10 @@ onUnmounted(() => {
 }
 
 .sidebar {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-secondary);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -178,13 +178,13 @@ onUnmounted(() => {
   margin: 0;
   font-size: 18px;
   font-weight: bold;
-  color: #000;
+  color: var(--text-color);
 }
 
 .app-version {
   margin: 5px 0 0 0;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--text-secondary);
 }
 
 .nav-menu {
@@ -199,18 +199,18 @@ onUnmounted(() => {
   padding: 12px 16px;
   border-radius: 8px;
   text-decoration: none;
-  color: #000;
+  color: var(--text-color);
   transition: all 0.3s ease;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--bg-tertiary);
 }
 
 .nav-item:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--input-bg);
   transform: scale(1.05);
 }
 
 .nav-item.active {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--input-bg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -218,13 +218,13 @@ onUnmounted(() => {
   width: 20px;
   height: 20px;
   margin-right: 12px;
-  color: #000;
+  color: var(--text-color);
 }
 
 .nav-text {
   font-size: 14px;
   font-weight: 500;
-  color: #000;
+  color: var(--text-color);
 }
 
 .main-wrapper {
@@ -240,42 +240,5 @@ onUnmounted(() => {
   border-radius: 12px;
 }
 
-/* 确保在暗色模式下也能正常显示 */
-@media (prefers-color-scheme: dark) {
-  .sidebar {
-    background: rgba(0, 0, 0, 0.8);
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .app-name {
-    color: #fff;
-  }
-
-  .app-version {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  .nav-item {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .nav-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .nav-item.active {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  .nav-icon,
-  .nav-text {
-    color: #fff;
-  }
-
-  .main-content {
-    background: transparent;
-    color: #fff;
-  }
-}
+/* 所有深色模式样式现在通过CSS变量自动处理 */
 </style>

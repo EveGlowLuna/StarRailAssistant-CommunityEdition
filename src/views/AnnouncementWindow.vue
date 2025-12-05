@@ -637,7 +637,7 @@ onMounted(() => {
 
     .loading-state,
     .error-state {
-        background: rgba(30, 41, 59, 0.95);
+        background: rgba(0, 0, 0, 0.95);
         border-color: rgba(255, 255, 255, 0.1);
     }
 

@@ -404,28 +404,32 @@ export default {
       confidence: 'Image Recognition Confidence Threshold'
     },
     
-    app: {
-      title: 'App Settings',
-      channel: 'App Channel',
-      stable: 'Stable',
-      beta: 'Beta',
-      allowNotifications: 'Allow Notifications',
-      allowSystemNotifications: 'Allow System Notifications',
-      allowEmailNotifications: 'Allow Email Notifications',
-      enableStartupLaunch: 'Launch on Startup',
-      enableMinimizeToTray: 'Minimize to Tray'
+    hotkeys: {
+      title: 'In-Game Hotkeys',
+      clickToSet: 'Click input box to set hotkey',
+      pressKey: 'Press a key to set hotkey',
+      activity: 'Activity',
+      chronicle: 'Chronicle',
+      warp: 'Warp',
+      guide: 'Guide',
+      map: 'Map',
+      technique: 'Technique'
     },
-    
-    network: {
-      title: 'Network Settings',
-      proxy: 'Proxy Settings',
-      addProxy: 'Add Proxy',
-      removeProxy: 'Remove'
-    },
-    
-    resetConfirm: 'Are you sure you want to reset all settings to default values?',
     
     notifications: {
+      title: 'Notifications',
+      allowNotifications: 'Allow Notifications',
+      allowSystemNotifications: 'System Notifications',
+      allowEmailNotifications: 'Email Notifications',
+      smtpSettings: 'SMTP Settings',
+      smtpServer: 'SMTP Server',
+      smtpPort: 'SMTP Port',
+      emailSender: 'Sender Email',
+      emailSenderPlaceholder: 'e.g.: 123456@qq.com',
+      emailAuthCode: 'Email Auth Code',
+      emailAuthCodePlaceholder: 'e.g.: 123456',
+      emailReceiver: 'Receiver Email',
+      emailReceiverPlaceholder: 'e.g.: 123456@qq.com',
       settingsSaved: 'Settings saved successfully',
       saveSettingsFailed: 'Failed to save settings',
       wallpaperSet: 'Wallpaper set successfully',
@@ -433,7 +437,15 @@ export default {
       wallpaperReset: 'Wallpaper reset to default',
       resetWallpaperFailed: 'Failed to reset wallpaper',
       unknownError: 'Unknown error'
-    }
+    },
+    
+    app: {
+      title: 'App Settings',
+      enableStartupLaunch: 'Launch on Startup',
+      enableMinimizeToTray: 'Minimize to Tray'
+    },
+    
+    resetConfirm: 'Are you sure you want to reset all settings to default values?'
   },
 
   // Common
