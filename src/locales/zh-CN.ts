@@ -25,6 +25,7 @@ export default {
     configList: '配置列表',
     selectAll: '全选',
     deselectAll: '取消全选',
+    invertSelection: '反选',
     deleteSelected: '删除选中',
     newConfig: '新建配置',
     refresh: '刷新',

@@ -25,6 +25,7 @@ export default {
     configList: 'Config List',
     selectAll: 'Select All',
     deselectAll: 'Deselect All',
+    invertSelection: 'Invert Selection',
     deleteSelected: 'Delete Selected',
     newConfig: 'New Config',
     refresh: 'Refresh',

@@ -45,113 +45,128 @@
             </div>
         </div>
 
-        <!-- 下方面板：左右分栏 -->
-        <div class="bottom-panels-container">
-            <!-- 左侧：功能展示区 -->
-            <div class="left-panel">
-                <div class="panel-content">
-                    <div class="section-header">
-                        <h3 class="section-title">{{ t('home.quickAccess') }}</h3>
-                    </div>
-                    <div class="feature-buttons">
-                        <button class="feature-button version-button" @click="showVersionUpdate">
-                            <div class="feature-icon">
-                                <RefreshCw :size="24" />
-                            </div>
-                            <div class="feature-text">
-                                <div class="feature-title">{{ t('home.versionUpdate') }}</div>
-                                <div class="feature-desc">{{ t('home.versionUpdateDesc') }}</div>
-                            </div>
-                        </button>
-                        
-                        <button class="feature-button announcement-button" @click="showAnnouncement">
-                            <div class="feature-icon">
-                                <Megaphone :size="24" />
-                            </div>
-                            <div class="feature-text">
-                                <div class="feature-title">{{ t('home.announcement') }}</div>
-                                <div class="feature-desc">{{ t('home.announcementDesc') }}</div>
-                            </div>
-                        </button>
-                        
-                        <button class="feature-button tutorial-button" @click="showTutorial">
-                            <div class="feature-icon">
-                                <BookOpen :size="24" />
-                            </div>
-                            <div class="feature-text">
-                                <div class="feature-title">{{ t('home.tutorial') }}</div>
-                                <div class="feature-desc">{{ t('home.tutorialDesc') }}</div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 右侧：配置管理区 -->
-            <div class="right-panel">
-                <div class="panel-content">
-                    <div class="section-header">
-                        <h3 class="section-title">{{ t('home.configManagement') }}</h3>
-                    </div>
-                    
-                    <!-- 操作按钮 -->
-                    <div class="action-buttons">
-                        <button
-                            class="action-button refresh-button"
-                            @click="refreshConfigs"
-                        >
-                            {{ t('home.refresh') }}
-                        </button>
-                        <button
-                            class="action-button new-button"
-                            @click="showCreateDialog = true"
-                        >
-                            {{ t('home.newConfig') }}
-                        </button>
-                        <button
-                            class="action-button delete-button"
-                            :disabled="!hasSelectedConfigs"
-                            @click="deleteSelectedConfigs"
-                        >
-                            {{ t('home.deleteSelected') }}
-                        </button>
-                    </div>
-
-                    <!-- 配置列表 -->
-                    <div class="config-list" v-if="configs.length > 0">
-                        <div
-                            v-for="config in orderedConfigs"
-                            :key="config.name"
-                            class="config-item"
-                            @mouseenter="hoveredConfig = config.name"
-                            @mouseleave="hoveredConfig = null"
-                        >
-                            <div class="config-order">{{ config.order }}</div>
-                            <input
-                                type="checkbox"
-                                :id="config.name"
-                                v-model="selectedConfigs"
-                                :value="config.name"
-                                class="config-checkbox"
-                                @change="saveTaskOrder"
-                            />
-                            <label :for="config.name" class="config-label">
-                                {{ config.name }}
-                            </label>
-                            <button
-                                v-if="hoveredConfig === config.name"
-                                class="delete-config-button"
-                                @click="deleteConfig(config.name)"
-                                title="删除配置"
-                            >
-                                <Trash :size="14" :color="'white'" />
+        <!-- 下方面板：合并的功能和配置区 -->
+        <div class="bottom-panel">
+            <div class="panel-content">
+                <div class="bottom-content-container">
+                    <!-- 左侧：功能展示区 -->
+                    <div class="left-section">
+                        <div class="section-header">
+                            <h3 class="section-title">{{ t('home.quickAccess') }}</h3>
+                        </div>
+                        <div class="feature-buttons">
+                            <button class="feature-button version-button" @click="showVersionUpdate">
+                                <div class="feature-icon">
+                                    <RefreshCw :size="24" />
+                                </div>
+                                <div class="feature-text">
+                                    <div class="feature-title">{{ t('home.versionUpdate') }}</div>
+                                    <div class="feature-desc">{{ t('home.versionUpdateDesc') }}</div>
+                                </div>
+                            </button>
+                            
+                            <button class="feature-button announcement-button" @click="showAnnouncement">
+                                <div class="feature-icon">
+                                    <Megaphone :size="24" />
+                                </div>
+                                <div class="feature-text">
+                                    <div class="feature-title">{{ t('home.announcement') }}</div>
+                                    <div class="feature-desc">{{ t('home.announcementDesc') }}</div>
+                                </div>
+                            </button>
+                            
+                            <button class="feature-button tutorial-button" @click="showTutorial">
+                                <div class="feature-icon">
+                                    <BookOpen :size="24" />
+                                </div>
+                                <div class="feature-text">
+                                    <div class="feature-title">{{ t('home.tutorial') }}</div>
+                                    <div class="feature-desc">{{ t('home.tutorialDesc') }}</div>
+                                </div>
                             </button>
                         </div>
                     </div>
 
-                    <!-- 空状态 -->
-                    <div v-else class="empty-state">
-                        <span class="empty-text">没有可用的配置，请添加配置。</span>
+                    <!-- 垂直分割线 -->
+                    <div class="vertical-divider"></div>
+
+                    <!-- 右侧：配置管理区 -->
+                    <div class="right-section">
+                        <div class="section-header">
+                            <h3 class="section-title">{{ t('home.configManagement') }}</h3>
+                        </div>
+                        
+                        <!-- 操作按钮 -->
+                        <div class="action-buttons">
+                            <button
+                                class="action-button refresh-button"
+                                @click="refreshConfigs"
+                            >
+                                {{ t('home.refresh') }}
+                            </button>
+                            <button
+                                class="action-button new-button"
+                                @click="showCreateDialog = true"
+                            >
+                                {{ t('home.newConfig') }}
+                            </button>
+                            <button
+                                class="action-button select-all-button"
+                                @click="selectAllConfigs"
+                            >
+                                {{ t('home.selectAll') }}
+                            </button>
+                            <button
+                                class="action-button invert-selection-button"
+                                @click="deselectAllConfigs"
+                            >
+                                {{ t('home.invertSelection') }}
+                            </button>
+                            <button
+                                class="action-button delete-button"
+                                :disabled="!hasSelectedConfigs"
+                                @click="deleteSelectedConfigs"
+                            >
+                                {{ t('home.deleteSelected') }}
+                            </button>
+                        </div>
+
+                        <!-- 配置列表 -->
+                        <div class="config-list" v-if="configs.length > 0">
+                            <div
+                                v-for="config in orderedConfigs"
+                                :key="config.name"
+                                class="config-item"
+                                @mouseenter="hoveredConfig = config.name"
+                                @mouseleave="hoveredConfig = null"
+                            >
+                                <div class="config-order">{{ config.order }}</div>
+                                <input
+                                    type="checkbox"
+                                    :id="config.name"
+                                    v-model="selectedConfigs"
+                                    :value="config.name"
+                                    class="config-checkbox"
+                                    @change="saveTaskOrder"
+                                />
+                                <label :for="config.name" class="config-label">
+                                    {{ config.name }}
+                                </label>
+                                <button
+                                    v-if="hoveredConfig === config.name"
+                                    class="delete-config-button"
+                                    @click="deleteConfig(config.name)"
+                                    title="删除配置"
+                                >
+                                    <Trash :size="14" :color="'white'" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 空状态 -->
+                        <div v-else class="empty-state">
+                            <span class="empty-text">没有可用的配置，请添加配置。</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -250,18 +265,31 @@ const hasSelectedConfigs = computed(() => {
 });
 
 const orderedConfigs = computed(() => {
-    // 根据保存的顺序对配置进行排序
-    const configsWithOrder = configs.value.map(config => ({
-        ...config,
-        order: taskOrder.value.indexOf(config.name) + 1
-    }));
+    // 根据选中的配置和顺序进行排序
+    const selectedSet = new Set(selectedConfigs.value);
+    const selectedWithOrder = configs.value
+        .filter(config => selectedSet.has(config.name))
+        .map(config => ({
+            ...config,
+            order: selectedConfigs.value.indexOf(config.name) + 1
+        }));
     
-    // 按顺序排序，未在顺序列表中的排在后面
-    return configsWithOrder.sort((a, b) => {
-        const orderA = a.order || Infinity;
-        const orderB = b.order || Infinity;
-        return orderA - orderB;
+    const unselected = configs.value
+        .filter(config => !selectedSet.has(config.name))
+        .map(config => ({
+            ...config,
+            order: 0
+        }));
+    
+    // 对未选中的配置按照 Default 第一，其他按首字母排序
+    unselected.sort((a, b) => {
+        if (a.name === 'Default') return -1;
+        if (b.name === 'Default') return 1;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
     });
+    
+    // 合并：选中的在前（按选中顺序），未选中的在后（按字母顺序）
+    return [...selectedWithOrder, ...unselected];
 });
 
 // 方法
@@ -296,6 +324,34 @@ const saveTaskOrder = async () => {
 
 const refreshConfigs = async () => {
     await loadConfigs();
+};
+
+const selectAllConfigs = () => {
+    // 按照 Default 第一，其他按首字母排序
+    const sortedConfigs = [...configs.value].sort((a, b) => {
+        if (a.name === 'Default') return -1;
+        if (b.name === 'Default') return 1;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
+    selectedConfigs.value = sortedConfigs.map(c => c.name);
+    saveTaskOrder();
+};
+
+const deselectAllConfigs = () => {
+    // 反选：选中未选的，取消已选的
+    const allConfigNames = configs.value.map(c => c.name);
+    const currentSelected = new Set(selectedConfigs.value);
+    
+    // 获取未选中的配置，按 Default 第一，其他按首字母排序
+    const unselected = allConfigNames.filter(name => !currentSelected.has(name));
+    unselected.sort((a, b) => {
+        if (a === 'Default') return -1;
+        if (b === 'Default') return 1;
+        return a.localeCompare(b, undefined, { sensitivity: 'base' });
+    });
+    
+    selectedConfigs.value = unselected;
+    saveTaskOrder();
 };
 
 const confirmCreateConfig = async () => {
@@ -537,18 +593,11 @@ onUnmounted(() => {
     will-change: transform;
 }
 
-.bottom-panels-container {
+.bottom-panel {
     flex: 1;
-    display: flex;
-    gap: 16px;
-    min-height: 0;
-}
-
-.left-panel,
-.right-panel {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     display: flex;
@@ -558,20 +607,40 @@ onUnmounted(() => {
     will-change: transform;
 }
 
-.left-panel {
-    flex: 2;
-}
-
-.right-panel {
-    flex: 3;
-}
-
 .panel-content {
   padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+.bottom-content-container {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    min-height: 0;
+}
+
+.vertical-divider {
+    width: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 0 16px;
+}
+
+.left-section,
+.right-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.left-section {
+    flex: 2;
+}
+
+.right-section {
+    flex: 3;
 }
 
 .section-header {
@@ -887,10 +956,13 @@ onUnmounted(() => {
 /* 深色模式样式 */
 @media (prefers-color-scheme: dark) {
     .top-panel,
-    .left-panel,
-    .right-panel {
+    .bottom-panel {
         background: rgba(0, 0, 0, 0.8);
         border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .vertical-divider {
+        background: rgba(255, 255, 255, 0.1);
     }
 
     .status-text {

@@ -59,8 +59,8 @@ const loadWallpaper = async () => {
 const initAppSettings = async () => {
   try {
     const settings = await invoke<AppSettings>('load_app_settings')
-    // 设置语言
-    setLocale(settings.language === 0 ? 'en-US' : 'zh-CN')
+    // 设置语言 (0=中文, 1=英文)
+    setLocale(settings.language === 0 ? 'zh-CN' : 'en-US')
   } catch (error) {
     // 如果加载失败，使用默认设置
     setLocale('zh-CN')

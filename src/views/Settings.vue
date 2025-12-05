@@ -52,8 +52,8 @@
             <CustomDropdown
               v-model="settings.language"
               :options="[
-                { label: 'English', value: 0 },
-                { label: '简体中文', value: 1 }
+                { label: '简体中文', value: 0 },
+                { label: 'English', value: 1 }
               ]"
               placeholder="选择语言"
               @update:modelValue="onLanguageChange"
@@ -386,7 +386,7 @@ interface AppSettings {
 // 响应式数据
 const originalSettings = ref<AppSettings | null>(null)
 const settings = reactive<AppSettings>({
-  language: 1,
+  language: 0, // 默认中文
   zoom: 125,
   confidence_threshold: 0.9,
   allow_notifications: true,
@@ -419,17 +419,17 @@ const hasChanges = computed(() => {
 
 const languageNote = computed(() => {
   return settings.language === 0 
-    ? 'To use automation features, your game interface must be set to Simplified Chinese'
-    : '使用该程序进行自动化需要您游戏界面设置为简体中文'
+    ? '使用该程序进行自动化需要您游戏界面设置为简体中文'
+    : 'To use automation features, your game interface must be set to Simplified Chinese'
 })
 
 
 
 // 方法
 const onLanguageChange = (value: string | number) => {
-  // 切换界面语言
+  // 切换界面语言 (0=中文, 1=英文)
   const lang = typeof value === 'number' ? value : parseInt(value)
-  setLocale(lang === 0 ? 'en-US' : 'zh-CN')
+  setLocale(lang === 0 ? 'zh-CN' : 'en-US')
 }
 
 // 方法
@@ -466,7 +466,7 @@ const resetSettings = () => {
 
 const confirmReset = () => {
   Object.assign(settings, {
-    language: 1,
+    language: 0, // 默认中文
     zoom: 125,
     confidence_threshold: 0.9,
     allow_notifications: true,
@@ -690,8 +690,8 @@ const resetHotkey = (key: string, defaultValue: string) => {
 // 生命周期
 onMounted(async () => {
   await loadSettings()
-  // 初始化语言
-  setLocale(settings.language === 0 ? 'en-US' : 'zh-CN')
+  // 初始化语言 (0=中文, 1=英文)
+  setLocale(settings.language === 0 ? 'zh-CN' : 'en-US')
 })
 </script>
 

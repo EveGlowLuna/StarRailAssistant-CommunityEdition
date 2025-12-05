@@ -1,5 +1,5 @@
 <template>
-    <div class="announcement-window">
+    <div class="announcement-window" ref="windowRef">
         <div class="announcement-container">
             <div class="announcement-header">
                 <h2 class="announcement-title">{{ t('announcement.title') }}</h2>
@@ -83,6 +83,25 @@ import { useTranslation } from "../composables/useTranslation";
 
 const { t } = useTranslation();
 
+const windowRef = ref<HTMLElement | null>(null);
+
+// 加载壁纸
+const loadWallpaper = async () => {
+  try {
+    const base64Data = await invoke<string | null>('get_wallpaper_base64');
+    
+    if (base64Data && windowRef.value) {
+      windowRef.value.style.setProperty('background-image', `url('${base64Data}')`, 'important');
+      windowRef.value.style.setProperty('background-size', 'cover', 'important');
+      windowRef.value.style.setProperty('background-position', 'center', 'important');
+      windowRef.value.style.setProperty('background-repeat', 'no-repeat', 'important');
+      console.log('Wallpaper applied to announcement window');
+    }
+  } catch (error) {
+    console.error("Failed to load wallpaper:", error);
+  }
+};
+
 interface Announcement {
     title: string;
     content: string;
@@ -135,6 +154,7 @@ const refreshAnnouncements = () => {
 
 onMounted(() => {
     loadAnnouncements();
+    loadWallpaper();
 });
 </script>
 

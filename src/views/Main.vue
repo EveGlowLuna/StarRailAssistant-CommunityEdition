@@ -200,8 +200,9 @@ onUnmounted(() => {
   border-radius: 8px;
   text-decoration: none;
   color: var(--text-color);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   background: var(--bg-tertiary);
+  position: relative;
 }
 
 .nav-item:hover {
@@ -209,9 +210,30 @@ onUnmounted(() => {
   transform: scale(1.05);
 }
 
+.nav-item:active {
+  transform: scale(0.98) translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 .nav-item.active {
-  background: var(--input-bg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 1);
+  font-weight: 600;
+}
+
+.nav-item.active:active {
+  transform: scale(0.98) translateY(2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 浅色模式下的选中效果 */
+@media (prefers-color-scheme: light) {
+  .nav-item.active {
+    background: rgba(0, 0, 0, 0.12);
+    color: rgba(0, 0, 0, 0.95);
+    font-weight: 600;
+  }
 }
 
 .nav-icon {

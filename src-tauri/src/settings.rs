@@ -67,7 +67,7 @@ impl Default for MainSettings {
             enable_auto_update: true,
             enable_minimize_to_tray: false,
             enable_startup_launch: false,
-            language: 1,
+            language: 0, // 0=中文, 1=英文
             proxies: vec!["https://tvv.tw/".to_string()],
             smtp_port: 465,
             smtp_server: "smtp.qq.com".to_string(),
@@ -131,7 +131,7 @@ pub struct AppSettings {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            language: 1,
+            language: 0, // 0=中文, 1=英文
             zoom: 125.0,
             confidence_threshold: 0.9,
             allow_notifications: true,

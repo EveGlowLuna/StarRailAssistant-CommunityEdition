@@ -1,5 +1,5 @@
 <template>
-    <div class="version-update-window">
+    <div class="version-update-window" ref="windowRef">
         <div class="version-update-container">
             <h2 class="window-title">{{ t('home.versionUpdate') }}</h2>
             <p class="placeholder-text">版本更新功能即将实现...</p>
@@ -8,9 +8,34 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from "../composables/useTranslation";
 
 const { t } = useTranslation();
+
+const windowRef = ref<HTMLElement | null>(null);
+
+// 加载壁纸
+const loadWallpaper = async () => {
+  try {
+    const base64Data = await invoke<string | null>('get_wallpaper_base64');
+    
+    if (base64Data && windowRef.value) {
+      windowRef.value.style.setProperty('background-image', `url('${base64Data}')`, 'important');
+      windowRef.value.style.setProperty('background-size', 'cover', 'important');
+      windowRef.value.style.setProperty('background-position', 'center', 'important');
+      windowRef.value.style.setProperty('background-repeat', 'no-repeat', 'important');
+      console.log('Wallpaper applied to version update window');
+    }
+  } catch (error) {
+    console.error("Failed to load wallpaper:", error);
+  }
+};
+
+onMounted(() => {
+    loadWallpaper();
+});
 </script>
 
 <style scoped>
