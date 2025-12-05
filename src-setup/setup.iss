@@ -1,7 +1,7 @@
 #define MyAppName "StarRailAssistant"
 #define MyAppVersion "unknown"
 #define MyAppPublisher "EveGlowLuna"
-#define MyAppURL "https://starrailassistant.top/"
+#define MyAppURL "https://starrailassistant.xyz/"
 #define MyAppExeName "StarRailAssistant.exe"
 
 [Setup]

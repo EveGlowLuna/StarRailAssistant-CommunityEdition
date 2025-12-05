@@ -6,18 +6,17 @@
 
 ## 📢 通知系统 API
 
-通知系统用于向用户显示消息提示，支持临时通知和持久通知两种模式。
+通知系统用于向用户显示消息提示，支持临时通知和常驻通知两种模式。
 
 ### `window.showNotification()`
 
-显示一个通知消息。
+显示一个临时通知消息（自动消失）。
 
 #### 函数签名
 
 ```typescript
 window.showNotification(
   message: string,
-  persistent?: boolean,
   duration?: number
 ): number
 ```
@@ -27,45 +26,74 @@ window.showNotification(
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
 | `message` | `string` | ✅ | - | 通知消息内容 |
-| `persistent` | `boolean` | ❌ | `false` | `true` 表示持久通知（需手动关闭），`false` 表示临时通知（自动消失） |
-| `duration` | `number` | ❌ | `5000` | 通知显示时长（毫秒），仅对临时通知有效 |
+| `duration` | `number` | ❌ | `5000` | 通知显示时长（毫秒） |
 
 #### 返回值
 
 返回通知的 ID（`number`），可用于手动关闭通知。
 
-#### 使用示例
-
-```typescript
-// 临时通知（5秒后自动消失）
-window.showNotification?.('配置保存成功', false, 5000)
-
-// 临时通知（使用默认时长 5 秒）
-window.showNotification?.('操作完成', false)
-
-// 持久通知（需要用户手动关闭）
-const notificationId = window.showNotification?.('重要提示：请检查配置', true)
-
-// 手动关闭通知
-window.removeNotification?.(notificationId)
-```
-
 #### 特性
 
-- ✅ 支持临时通知和持久通知
-- ✅ 自动消失（临时通知）
-- ✅ 最多同时显示 3 个通知
+- ✅ 自动消失
+- ✅ 最多同时显示 5 个临时通知
 - ✅ 支持鼠标悬停暂停倒计时
-- ✅ 可手动关闭
+- ✅ 可手动关闭（悬停时显示关闭按钮）
 - ✅ 自动适配深色/浅色模式
 
 #### 注意事项
 
 1. 使用可选链操作符 `?.` 确保 API 可用
-2. 通知会自动排队，超过 3 个时最旧的会被移除
+2. 通知会自动排队，超过 5 个时最旧的会被移除
 3. 通知内容应简洁明了，避免过长
-4. 持久通知应谨慎使用，避免干扰用户
-5. 临时通知适合大多数场景（操作反馈、状态提示等）
+4. 临时通知适合大多数场景（操作反馈、状态提示等）
+
+---
+
+### `window.showPersistentNotification()`
+
+显示一个常驻通知消息（带自定义按钮，需要用户操作）。
+
+#### 函数签名
+
+```typescript
+window.showPersistentNotification(
+  message: string,
+  buttons: NotificationButton[]
+): number
+
+interface NotificationButton {
+  text: string
+  onClick: () => void
+}
+```
+
+#### 参数说明
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `message` | `string` | ✅ | 通知消息内容 |
+| `buttons` | `NotificationButton[]` | ✅ | 按钮数组，每个按钮包含文本和点击回调 |
+
+#### 返回值
+
+返回通知的 ID（`number`）。
+
+#### 特性
+
+- ✅ 不会自动消失，需要用户点击按钮
+- ✅ 支持自定义多个按钮
+- ✅ 点击按钮后自动关闭通知
+- ✅ 不计入临时通知的数量限制
+- ✅ 不会强制临时通知被移除
+- ✅ 自动适配深色/浅色模式
+
+#### 注意事项
+
+1. 使用可选链操作符 `?.` 确保 API 可用
+2. 常驻通知应谨慎使用，避免干扰用户
+3. 按钮文本应简洁明了
+4. 点击任何按钮后通知会自动关闭
+5. 适合需要用户确认或选择的场景
 
 ### `window.removeNotification()`
 
@@ -81,20 +109,7 @@ window.removeNotification(id: number): void
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `id` | `number` | ✅ | 通知 ID（由 `showNotification` 返回） |
-
-#### 使用示例
-
-```typescript
-// 显示持久通知并保存 ID
-const id = window.showNotification?.('正在处理...', true)
-
-// 处理完成后手动关闭
-setTimeout(() => {
-  window.removeNotification?.(id)
-  window.showNotification?.('处理完成', false, 3000)
-}, 2000)
-```
+| `id` | `number` | ✅ | 通知 ID（由 `showNotification` 或 `showPersistentNotification` 返回） |
 
 ---
 
@@ -195,36 +210,6 @@ const saveConfig = async () => {
 
 ## 🔧 错误处理最佳实践
 
-### 统一的错误处理模式
-
-```typescript
-const performAction = async () => {
-  try {
-    // 记录开始
-    await window.logToConsole?.('前端', 'INFO', '开始执行操作')
-    
-    // 执行操作
-    const result = await someAsyncOperation()
-    
-    // 记录成功
-    await window.logToConsole?.('前端', 'SUCCESS', '操作执行成功')
-    window.showNotification?.('操作成功', false, 3000)  // 临时通知
-    
-    return result
-  } catch (error) {
-    // 记录错误
-    const errorMsg = error instanceof Error ? error.message : '未知错误'
-    await window.logToConsole?.('前端', 'ERR', `操作失败: ${errorMsg}`)
-    
-    // 显示通知
-    window.showNotification?.('操作失败', false, 3000)  // 临时通知
-    
-    // 可选：重新抛出错误
-    throw error
-  }
-}
-```
-
 ### 全局错误捕获
 
 在 `main.ts` 中已配置全局错误捕获：
@@ -275,17 +260,30 @@ Windows: C:\Users\<用户名>\AppData\Roaming\SRA\SRA-CE-Logs\
 
 ## 💡 使用建议
 
-### 何时使用通知
+### 何时使用临时通知
 
-✅ **适合使用通知的场景：**
+✅ **适合使用临时通知的场景：**
 - 用户操作的即时反馈（保存、删除、创建等）
-- 重要的状态变更提示
 - 操作成功/失败的确认
+- 一般的状态提示
 
-❌ **不适合使用通知的场景：**
+❌ **不适合使用临时通知的场景：**
 - 频繁的状态更新
 - 调试信息
 - 详细的错误堆栈
+
+### 何时使用常驻通知
+
+✅ **适合使用常驻通知的场景：**
+- 需要用户确认的重要操作
+- 需要用户选择的场景（如版本更新）
+- 任务完成后需要用户查看结果
+- 需要用户注意的重要提示
+
+❌ **不适合使用常驻通知的场景：**
+- 一般的操作反馈（使用临时通知）
+- 频繁出现的提示
+- 不需要用户操作的信息
 
 ### 何时使用日志
 
@@ -308,7 +306,7 @@ const deleteConfig = async (configName: string) => {
   // 检查是否为默认配置
   if (configName === 'Default') {
     // 只显示通知，不记录日志（这是预期的用户行为）
-    window.showNotification?.('默认配置不能删除', false, 3000)
+    window.showNotification?.('默认配置不能删除', 3000)
     return
   }
   
@@ -321,12 +319,48 @@ const deleteConfig = async (configName: string) => {
     
     // 记录成功并通知用户
     await window.logToConsole?.('前端', 'SUCCESS', `配置删除成功: ${configName}`)
-    window.showNotification?.('配置删除成功', true, 3000)
+    window.showNotification?.('配置删除成功', 3000)
   } catch (error) {
     // 记录错误并通知用户
     const errorMsg = error instanceof Error ? error.message : '未知错误'
     await window.logToConsole?.('前端', 'ERR', `配置删除失败: ${errorMsg}`)
-    window.showNotification?.('配置删除失败', false, 3000)
+    window.showNotification?.('配置删除失败', 3000)
+  }
+}
+
+// 使用常驻通知的示例
+const checkForUpdates = async () => {
+  try {
+    const updateInfo = await invoke('check_updates')
+    
+    if (updateInfo.hasUpdate) {
+      // 显示常驻通知，等待用户操作
+      window.showPersistentNotification?.(
+        `发现新版本 ${updateInfo.version}，是否立即更新？`,
+        [
+          {
+            text: '立即更新',
+            onClick: async () => {
+              await window.logToConsole?.('前端', 'INFO', '用户选择立即更新')
+              await invoke('start_update')
+              window.showNotification?.('开始下载更新...', 3000)
+            }
+          },
+          {
+            text: '稍后提醒',
+            onClick: () => {
+              window.logToConsole?.('前端', 'INFO', '用户选择稍后更新')
+            }
+          }
+        ]
+      )
+    } else {
+      window.showNotification?.('当前已是最新版本', 3000)
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : '未知错误'
+    await window.logToConsole?.('前端', 'ERR', `检查更新失败: ${errorMsg}`)
+    window.showNotification?.('检查更新失败', 3000)
   }
 }
 ```
@@ -344,9 +378,17 @@ type MessageSource = '前端' | '后端' | '进程端'
 // 消息级别
 type MessageLevel = 'INFO' | 'WARN' | 'ERR' | 'DEBUG' | 'TRACE' | 'SUCCESS' | 'MSG'
 
+// 通知按钮
+interface NotificationButton {
+  text: string
+  onClick: () => void
+}
+
 // 全局 API
 interface Window {
-  showNotification?: (message: string, isSuccess: boolean, duration?: number) => void
+  showNotification?: (message: string, duration?: number) => number
+  showPersistentNotification?: (message: string, buttons: NotificationButton[]) => number
+  removeNotification?: (id: number) => void
   logToConsole?: (source: MessageSource, level: MessageLevel, message: string) => Promise<void>
 }
 ```

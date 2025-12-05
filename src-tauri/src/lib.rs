@@ -11,6 +11,7 @@ mod wallpaper;
 mod announcement;
 mod settings;
 mod encryption;
+mod shortcut;
 
 use std::thread;
 use std::time::Duration;
@@ -46,6 +47,9 @@ pub fn run() {
             commands::get_announcements,
             commands::load_app_settings,
             commands::save_app_settings,
+            commands::check_desktop_shortcut_needed,
+            commands::create_desktop_shortcut,
+            commands::save_skip_shortcut_prompt,
             #[cfg(target_os = "windows")]
             commands::run_elevated_command
         ])

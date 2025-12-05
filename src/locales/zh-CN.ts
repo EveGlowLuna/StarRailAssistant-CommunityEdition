@@ -43,6 +43,12 @@ export default {
     notifications: {
       cannotDeleteDefault: '默认配置项禁止删除。',
       taskStopped: '任务已停止',
+      createShortcut: '是否为StarRailAssistant创建桌面快捷方式？',
+      yes: '是',
+      no: '否',
+      noRemind: '不再提示',
+      shortcutCreated: '桌面快捷方式创建成功',
+      shortcutFailed: '桌面快捷方式创建失败',
       stopTaskFailed: '停止任务失败',
       selectConfigFirst: '请先选择要执行的配置',
       taskStarted: '开始执行任务: {names}',

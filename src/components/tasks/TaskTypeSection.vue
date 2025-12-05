@@ -66,7 +66,7 @@ const runTimes = ref(1)
 
 const handleAddTask = () => {
   if (selectedLevel.value === 0) {
-    window.showNotification?.(t('tasks.notifications.selectLevel').value, false, 2000)
+    window.showNotification?.(t('tasks.notifications.selectLevel').value, 2000)
     return
   }
 

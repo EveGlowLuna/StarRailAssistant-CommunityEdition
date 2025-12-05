@@ -380,7 +380,7 @@ const deleteSelectedConfigs = async () => {
         selectedConfigs.value.length === 1 &&
         selectedConfigs.value.includes("Default")
     ) {
-        window.showNotification?.(t('home.notifications.cannotDeleteDefault').value, false, 3000);
+        window.showNotification?.(t('home.notifications.cannotDeleteDefault').value, 3000);
         return;
     }
 
@@ -390,7 +390,7 @@ const deleteSelectedConfigs = async () => {
     );
 
     if (filteredConfigs.length === 0) {
-        window.showNotification?.(t('home.notifications.cannotDeleteDefault').value, false, 3000);
+        window.showNotification?.(t('home.notifications.cannotDeleteDefault').value, 3000);
         return;
     }
 
@@ -411,7 +411,7 @@ const deleteSelectedConfigs = async () => {
 
 const deleteConfig = async (configName: string) => {
     if (configName === "Default") {
-        window.showNotification?.(t('home.notifications.cannotDeleteDefault').value, false, 3000);
+        window.showNotification?.(t('home.notifications.cannotDeleteDefault').value, 3000);
         return;
     }
 
@@ -446,15 +446,15 @@ const toggleTaskExecution = async () => {
         try {
             await invoke("task_stop");
             isExecutingTask.value = false;
-            window.showNotification?.(t('home.notifications.taskStopped').value, false, 3000);
+            window.showNotification?.(t('home.notifications.taskStopped').value, 3000);
         } catch (error) {
             console.error("Failed to stop task:", error);
-            window.showNotification?.(t('home.notifications.stopTaskFailed').value, false, 3000);
+            window.showNotification?.(t('home.notifications.stopTaskFailed').value, 3000);
         }
     } else {
         // 开始执行任务
         if (selectedConfigs.value.length === 0) {
-            window.showNotification?.(t('home.notifications.selectConfigFirst').value, false, 3000);
+            window.showNotification?.(t('home.notifications.selectConfigFirst').value, 3000);
             return;
         }
         
@@ -462,7 +462,7 @@ const toggleTaskExecution = async () => {
         const { validateConfigs } = await import('../utils/configValidator');
         const validationError = await validateConfigs(selectedConfigs.value);
         if (validationError) {
-            window.showNotification?.(validationError, false, 5000);
+            window.showNotification?.(validationError, 5000);
             return;
         }
         
@@ -470,11 +470,11 @@ const toggleTaskExecution = async () => {
             const configName = selectedConfigs.value.length > 0 ? selectedConfigs.value.join(' ') : null;
             await invoke("task_run", { configName });
             isExecutingTask.value = true;
-            window.showNotification?.(t('home.notifications.taskStarted', { names: selectedConfigs.value.join(', ') }).value, false, 3000);
+            window.showNotification?.(t('home.notifications.taskStarted', { names: selectedConfigs.value.join(', ') }).value, 3000);
         } catch (error: any) {
             console.error("Failed to execute task:", error);
             const errorMsg = typeof error === 'string' ? error : t('home.notifications.executeTaskFailed').value;
-            window.showNotification?.(errorMsg, false, 5000);
+            window.showNotification?.(errorMsg, 5000);
         }
     }
 };
@@ -484,17 +484,17 @@ const restartCore = async () => {
         if (coreStatus.value === 'not-running') {
             // 如果核心未运行，调用启动命令
             await invoke("start_sra_process_command", { arguments: null });
-            window.showNotification?.(t('home.notifications.coreStarted').value, false, 3000);
+            window.showNotification?.(t('home.notifications.coreStarted').value, 3000);
         } else {
             // 否则调用重启命令
             await invoke("restart_sra_process_command", { arguments: null });
-            window.showNotification?.(t('home.notifications.coreRestarted').value, false, 3000);
+            window.showNotification?.(t('home.notifications.coreRestarted').value, 3000);
         }
     } catch (error: any) {
         console.error("Failed to restart/start core:", error);
         coreStatus.value = "error";
         const errorMsg = typeof error === 'string' ? error : t('home.notifications.coreRestartFailed').value;
-        window.showNotification?.(errorMsg, false, 5000);
+        window.showNotification?.(errorMsg, 5000);
     }
 };
 

@@ -451,11 +451,11 @@ const saveSettings = async () => {
     await invoke('save_app_settings', { settings })
     originalSettings.value = JSON.parse(JSON.stringify(settings))
     
-    window.showNotification?.(t('settings.notifications.settingsSaved').value, false, 3000)
+    window.showNotification?.(t('settings.notifications.settingsSaved').value, 3000)
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : t('settings.notifications.unknownError').value
     await window.logToConsole?.('前端', 'ERR', `${t('settings.notifications.saveSettingsFailed').value}: ${errorMsg}`)
-    window.showNotification?.(t('settings.notifications.saveSettingsFailed').value, false, 3000)
+    window.showNotification?.(t('settings.notifications.saveSettingsFailed').value, 3000)
   }
 }
 
@@ -525,7 +525,7 @@ const selectWallpaper = async () => {
     settings.wallpaper_path = cachedPath
     
     await window.logToConsole?.('前端', 'SUCCESS', t('settings.notifications.wallpaperSet').value)
-    window.showNotification?.(t('settings.notifications.wallpaperSet').value, false, 3000)
+    window.showNotification?.(t('settings.notifications.wallpaperSet').value, 3000)
     
     // 获取base64数据并立即应用壁纸
     await window.logToConsole?.('前端', 'DEBUG', t('console.logs.callGetWallpaperBase64').value)
@@ -543,7 +543,7 @@ const selectWallpaper = async () => {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : t('settings.notifications.unknownError').value
     await window.logToConsole?.('前端', 'ERR', `${t('settings.notifications.selectWallpaperFailed').value}: ${errorMsg}`)
-    window.showNotification?.(t('settings.notifications.selectWallpaperFailed').value, false, 3000)
+    window.showNotification?.(t('settings.notifications.selectWallpaperFailed').value, 3000)
   }
 }
 
@@ -557,14 +557,14 @@ const resetWallpaper = async () => {
     settings.wallpaper_path = null
     
     await window.logToConsole?.('前端', 'SUCCESS', t('settings.notifications.wallpaperReset').value)
-    window.showNotification?.(t('settings.notifications.wallpaperReset').value, false, 3000)
+    window.showNotification?.(t('settings.notifications.wallpaperReset').value, 3000)
     
     // 立即移除背景壁纸
     removeWallpaperFromBackground()
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : t('settings.notifications.unknownError').value
     await window.logToConsole?.('前端', 'ERR', `${t('settings.notifications.resetWallpaperFailed').value}: ${errorMsg}`)
-    window.showNotification?.(t('settings.notifications.resetWallpaperFailed').value, false, 3000)
+    window.showNotification?.(t('settings.notifications.resetWallpaperFailed').value, 3000)
   }
 }
 

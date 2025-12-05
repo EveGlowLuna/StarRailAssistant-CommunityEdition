@@ -82,12 +82,15 @@ impl Default for MainSettings {
 #[serde(rename_all = "PascalCase")]
 pub struct CESettings {
     pub wallpaper_path: Option<String>,
+    #[serde(default)]
+    pub skip_desktop_shortcut_prompt: bool,
 }
 
 impl Default for CESettings {
     fn default() -> Self {
         Self {
             wallpaper_path: None,
+            skip_desktop_shortcut_prompt: false,
         }
     }
 }
@@ -126,6 +129,7 @@ pub struct AppSettings {
     
     // CE专属设置
     pub wallpaper_path: Option<String>,
+    pub skip_desktop_shortcut_prompt: bool,
 }
 
 impl Default for AppSettings {
@@ -151,6 +155,7 @@ impl Default for AppSettings {
             enable_startup_launch: false,
             enable_minimize_to_tray: false,
             wallpaper_path: None,
+            skip_desktop_shortcut_prompt: false,
         }
     }
 }
@@ -219,6 +224,7 @@ pub fn load_settings() -> Result<AppSettings, String> {
         enable_startup_launch: main_settings.enable_startup_launch,
         enable_minimize_to_tray: main_settings.enable_minimize_to_tray,
         wallpaper_path: ce_settings.wallpaper_path,
+        skip_desktop_shortcut_prompt: ce_settings.skip_desktop_shortcut_prompt,
     })
 }
 
@@ -302,6 +308,7 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
     // 分离 CE 设置
     let ce_settings = CESettings {
         wallpaper_path: settings.wallpaper_path,
+        skip_desktop_shortcut_prompt: settings.skip_desktop_shortcut_prompt,
     };
 
     // 保存 CE 设置到 SRA-CE-Settings.json

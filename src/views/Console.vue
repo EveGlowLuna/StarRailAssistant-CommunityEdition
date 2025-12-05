@@ -192,7 +192,7 @@ const filteredMessages = computed(() => {
 // 导出日志
 const exportLogs = async () => {
     if (messages.value.length === 0) {
-        window.showNotification?.("没有日志可导出", false, 3000);
+        window.showNotification?.("没有日志可导出", 3000);
         return;
     }
 
@@ -219,10 +219,10 @@ const exportLogs = async () => {
             .join("\n");
 
         await writeTextFile(filePath, logContent);
-        window.showNotification?.("日志导出成功", false, 3000);
+        window.showNotification?.("日志导出成功", 3000);
     } catch (error) {
         console.error("Failed to export logs:", error);
-        window.showNotification?.("日志导出失败", false, 3000);
+        window.showNotification?.("日志导出失败", 3000);
     }
 };
 
@@ -318,7 +318,7 @@ watch(() => messages.value.length, async (newLength, oldLength) => {
         const newMessage = messages.value[newLength - 1];
         // 检查是否是进程端的消息且包含 [Start]
         if (newMessage.source === '进程端' && newMessage.message.includes('[Start]')) {
-            window.showNotification?.(t('console.taskStarted').value, false, 3000);
+            window.showNotification?.(t('console.taskStarted').value, 3000);
         }
     }
 });

@@ -91,14 +91,13 @@ const onEnableAutoPlotChange = async () => {
     if (window.showNotification) {
       window.showNotification(
         enableAutoPlot.value ? t('extensions.notifications.autoPlotEnabled').value : t('extensions.notifications.autoPlotDisabled').value,
-        false,
         3000
       );
     }
   } catch (error) {
     console.error('Failed to toggle auto plot:', error);
     if (window.showNotification) {
-      window.showNotification(t('extensions.notifications.toggleFailed').value, false, 3000);
+      window.showNotification(t('extensions.notifications.toggleFailed').value, 3000);
     }
     // 回滚状态
     enableAutoPlot.value = !enableAutoPlot.value;
@@ -115,14 +114,13 @@ const onSkipPlotChange = async () => {
     if (window.showNotification) {
       window.showNotification(
         skipPlot.value ? t('extensions.notifications.skipPlotEnabled').value : t('extensions.notifications.skipPlotDisabled').value,
-        false,
         3000
       );
     }
   } catch (error) {
     console.error('Failed to toggle skip plot:', error);
     if (window.showNotification) {
-      window.showNotification(t('extensions.notifications.toggleFailed').value, false, 3000);
+      window.showNotification(t('extensions.notifications.toggleFailed').value, 3000);
     }
     // 回滚状态
     skipPlot.value = !skipPlot.value;

@@ -6,6 +6,7 @@ use crate::logger;
 use crate::wallpaper;
 use crate::announcement;
 use crate::settings;
+use crate::shortcut;
 
 #[tauri::command]
 pub fn greet(name: &str) -> String {
@@ -181,4 +182,36 @@ pub fn load_app_settings() -> Result<settings::AppSettings, String> {
 #[tauri::command]
 pub fn save_app_settings(settings: settings::AppSettings) -> Result<(), String> {
     settings::save_settings(settings)
+}
+
+// 快捷方式管理命令
+#[tauri::command]
+pub fn check_desktop_shortcut_needed() -> Result<bool, String> {
+    // 检查是否需要提示创建快捷方式
+    let settings = settings::load_settings()?;
+    
+    // 如果用户选择了"不再提示"，直接返回false
+    if settings.skip_desktop_shortcut_prompt {
+        return Ok(false);
+    }
+    
+    // 检查是否有桌面文件夹
+    let has_desktop = shortcut::has_desktop_folder()?;
+    if !has_desktop {
+        return Ok(false);
+    }
+    
+    // 检查是否已有快捷方式
+    let has_shortcut = shortcut::has_desktop_shortcut()?;
+    Ok(!has_shortcut)
+}
+
+#[tauri::command]
+pub fn create_desktop_shortcut() -> Result<(), String> {
+    shortcut::create_desktop_shortcut()
+}
+
+#[tauri::command]
+pub fn save_skip_shortcut_prompt() -> Result<(), String> {
+    shortcut::save_skip_prompt_setting()
 }

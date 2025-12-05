@@ -43,6 +43,12 @@ export default {
     notifications: {
       cannotDeleteDefault: 'Default config cannot be deleted.',
       taskStopped: 'Task stopped',
+      createShortcut: 'Create desktop shortcut for StarRailAssistant?',
+      yes: 'Yes',
+      no: 'No',
+      noRemind: 'Don\'t remind again',
+      shortcutCreated: 'Desktop shortcut created successfully',
+      shortcutFailed: 'Failed to create desktop shortcut',
       stopTaskFailed: 'Failed to stop task',
       selectConfigFirst: 'Please select a config first',
       taskStarted: 'Task started: {names}',

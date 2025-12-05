@@ -1,13 +1,19 @@
 import { ref } from 'vue'
 
+export interface NotificationButton {
+  text: string
+  onClick: () => void
+}
+
 interface Notification {
   id: number
   message: string
-  persistent: boolean
+  type: 'temporary' | 'persistent'
   duration: number
   paused?: boolean
   remainingTime?: number
   timeoutId?: number
+  buttons?: NotificationButton[]
 }
 
 class NotificationManager {
@@ -18,12 +24,12 @@ class NotificationManager {
     return this.notifications
   }
 
-  addNotification(message: string, persistent: boolean = false, duration: number = 5000) {
+  addNotification(message: string, duration: number = 5000) {
     const id = ++this.notificationId
     const notification: Notification = {
       id,
       message,
-      persistent,
+      type: 'temporary',
       duration,
       remainingTime: duration,
       paused: false
@@ -31,23 +37,41 @@ class NotificationManager {
 
     this.notifications.value.push(notification)
 
-    // 限制最多3个通知
-    if (this.notifications.value.length > 3) {
-      const removed = this.notifications.value.shift()
-      if (removed?.timeoutId) {
-        clearTimeout(removed.timeoutId)
+    // 限制最多5个临时通知（不包括常驻通知）
+    const temporaryNotifications = this.notifications.value.filter(n => n.type === 'temporary')
+    if (temporaryNotifications.length > 5) {
+      const removed = temporaryNotifications[0]
+      const index = this.notifications.value.findIndex(n => n.id === removed.id)
+      if (index > -1) {
+        if (removed.timeoutId) {
+          clearTimeout(removed.timeoutId)
+        }
+        this.notifications.value.splice(index, 1)
       }
     }
 
-    if (!persistent) {
-      this.startTimer(notification)
+    this.startTimer(notification)
+
+    return id
+  }
+
+  addPersistentNotification(message: string, buttons: NotificationButton[]) {
+    const id = ++this.notificationId
+    const notification: Notification = {
+      id,
+      message,
+      type: 'persistent',
+      duration: 0,
+      buttons
     }
+
+    this.notifications.value.push(notification)
 
     return id
   }
 
   private startTimer(notification: Notification) {
-    if (notification.persistent || notification.paused) return
+    if (notification.type === 'persistent' || notification.paused) return
 
     notification.timeoutId = setTimeout(() => {
       this.removeNotification(notification.id)
@@ -63,7 +87,7 @@ class NotificationManager {
 
   pauseTimer(id: number) {
     const notification = this.notifications.value.find(n => n.id === id)
-    if (notification && !notification.persistent) {
+    if (notification && notification.type === 'temporary') {
       notification.paused = true
       notification.remainingTime = notification.remainingTime || notification.duration
       this.stopTimer(notification)
@@ -72,7 +96,7 @@ class NotificationManager {
 
   resumeTimer(id: number) {
     const notification = this.notifications.value.find(n => n.id === id)
-    if (notification && !notification.persistent) {
+    if (notification && notification.type === 'temporary') {
       notification.paused = false
       this.startTimer(notification)
     }
@@ -101,6 +125,7 @@ export const useNotifications = () => {
   return {
     notifications: notificationManager.getNotifications(),
     addNotification: notificationManager.addNotification.bind(notificationManager),
+    addPersistentNotification: notificationManager.addPersistentNotification.bind(notificationManager),
     removeNotification: notificationManager.removeNotification.bind(notificationManager),
     pauseTimer: notificationManager.pauseTimer.bind(notificationManager),
     resumeTimer: notificationManager.resumeTimer.bind(notificationManager),
@@ -111,15 +136,17 @@ export const useNotifications = () => {
 // 全局通知函数，供所有组件和 Rust 后端调用
 declare global {
   interface Window {
-    showNotification: (message: string, persistent?: boolean, duration?: number) => number
+    showNotification: (message: string, duration?: number) => number
+    showPersistentNotification: (message: string, buttons: NotificationButton[]) => number
     removeNotification: (id: number) => void
   }
 }
 
 // 在应用启动时挂载全局函数
 export const setupGlobalNotifications = () => {
-  const { addNotification, removeNotification } = useNotifications()
+  const { addNotification, addPersistentNotification, removeNotification } = useNotifications()
 
   window.showNotification = addNotification
+  window.showPersistentNotification = addPersistentNotification
   window.removeNotification = removeNotification
 }

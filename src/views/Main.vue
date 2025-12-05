@@ -88,6 +88,53 @@ const loadDefaultBackground = async () => {
   }
 }
 
+// 检查是否需要提示创建桌面快捷方式
+const checkDesktopShortcut = async () => {
+  try {
+    const { invoke } = await import('@tauri-apps/api/core')
+    const needed = await invoke<boolean>('check_desktop_shortcut_needed')
+    
+    if (needed) {
+      // 使用新的常驻通知API询问用户
+      window.showPersistentNotification?.(
+        t('home.notifications.createShortcut').value,
+        [
+          {
+            text: t('home.notifications.yes').value,
+            onClick: async () => {
+              try {
+                await invoke('create_desktop_shortcut')
+                window.showNotification?.(t('home.notifications.shortcutCreated').value, 3000)
+              } catch (error) {
+                console.error('Failed to create shortcut:', error)
+                window.showNotification?.(t('home.notifications.shortcutFailed').value, 3000)
+              }
+            }
+          },
+          {
+            text: t('home.notifications.no').value,
+            onClick: () => {
+              // 用户选择"否"，不做任何操作
+            }
+          },
+          {
+            text: t('home.notifications.noRemind').value,
+            onClick: async () => {
+              try {
+                await invoke('save_skip_shortcut_prompt')
+              } catch (error) {
+                console.error('Failed to save skip prompt setting:', error)
+              }
+            }
+          }
+        ]
+      )
+    }
+  } catch (error) {
+    console.error('Failed to check desktop shortcut:', error)
+  }
+}
+
 // 从 package.json 获取版本号
 onMounted(async () => {
   // 加载默认背景
@@ -99,13 +146,16 @@ onMounted(async () => {
       appVersion.value = data.version
     })
   
+  // 检查桌面快捷方式
+  await checkDesktopShortcut()
+  
   // 全局监听任务状态变化
   unlistenStatusChange = await listen<string>("sra-status-changed", (event) => {
     const newStatus = event.payload as any;
     
     // 如果之前在执行任务，现在变成running，说明任务完成了
     if (newStatus === "running" && isExecutingTask.value) {
-      window.showNotification?.(t('home.notifications.taskCompleted').value, false, 3000);
+      window.showNotification?.(t('home.notifications.taskCompleted').value, 3000);
       isExecutingTask.value = false;
     } else if (newStatus === "task-running") {
       isExecutingTask.value = true;

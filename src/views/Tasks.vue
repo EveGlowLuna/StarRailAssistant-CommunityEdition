@@ -264,10 +264,10 @@ const loadConfig = async () => {
 const saveConfig = async () => {
   try {
     await invoke('save_config', { config: config.value })
-    window.showNotification?.(t('tasks.notifications.configSaved').value, false, 3000)
+    window.showNotification?.(t('tasks.notifications.configSaved').value, 3000)
   } catch (error) {
     console.error('Failed to save config:', error)
-    window.showNotification?.(t('tasks.notifications.configSaveFailed').value, false, 3000)
+    window.showNotification?.(t('tasks.notifications.configSaveFailed').value, 3000)
   }
 }
 
@@ -280,7 +280,7 @@ const saveAndExecute = async () => {
     const { validateCurrencyWars } = await import('../utils/configValidator')
     const validationError = validateCurrencyWars(config.value)
     if (validationError) {
-      window.showNotification?.(validationError, false, 5000)
+      window.showNotification?.(validationError, 5000)
       return
     }
     
@@ -288,10 +288,10 @@ const saveAndExecute = async () => {
     const configName = configs.value[currentConfigIndex.value]
     await invoke('task_run', { configName })
     
-    window.showNotification?.(t('tasks.notifications.taskStarted', { name: configName }).value, false, 3000)
+    window.showNotification?.(t('tasks.notifications.taskStarted', { name: configName }).value, 3000)
   } catch (error) {
     console.error('Failed to save and execute:', error)
-    window.showNotification?.(t('tasks.notifications.executeFailed').value, false, 3000)
+    window.showNotification?.(t('tasks.notifications.executeFailed').value, 3000)
   }
 }
 
@@ -303,10 +303,10 @@ const confirmCreateConfig = async () => {
     await loadConfigs()
     showCreateDialog.value = false
     newConfigName.value = ''
-    window.showNotification?.(t('tasks.notifications.configCreated').value, false, 3000)
+    window.showNotification?.(t('tasks.notifications.configCreated').value, 3000)
   } catch (error) {
     console.error('Failed to create config:', error)
-    window.showNotification?.(t('tasks.notifications.configCreateFailed').value, false, 3000)
+    window.showNotification?.(t('tasks.notifications.configCreateFailed').value, 3000)
   }
 }
 
