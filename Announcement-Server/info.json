@@ -1,20 +1,39 @@
 {
   "latest-version": [
     {
-      "release": {
-        "frontend": "0.1.0",
-        "backend": "0.1.0"
-      },
-      "download-url": {
-        "china": "https://alist.starrailassistant.xyz/d/local%3ASRA-CE/beta/StarRailAssistant_0.1.0_Setup.exe",
-        "global": ""
+      "stable": {
+        "frontend": {
+          "version": "0.1.0",
+          "download-url": {
+            "china": "PLACEHOLDER_FRONTEND_CHINA_URL",
+            "global": "PLACEHOLDER_FRONTEND_GLOBAL_URL"
+          }
+        },
+        "backend": {
+          "version": "0.1.0",
+          "download-url": {
+            "china": "PLACEHOLDER_BACKEND_CHINA_URL",
+            "global": "PLACEHOLDER_BACKEND_GLOBAL_URL"
+          }
+        }
       }
     },
     {
-      "beta": "0.1.1",
-      "download-url": {
-        "china": "https://alist.starrailassistant.xyz/d/local%3ASRA-CE/beta/StarRailAssistant_0.1.0_Setup.exe",
-        "global": ""
+      "beta": {
+        "frontend": {
+          "version": "0.1.1",
+          "download-url": {
+            "china": "PLACEHOLDER_FRONTEND_BETA_CHINA_URL",
+            "global": "PLACEHOLDER_FRONTEND_BETA_GLOBAL_URL"
+          }
+        },
+        "backend": {
+          "version": "0.1.1",
+          "download-url": {
+            "china": "PLACEHOLDER_BACKEND_BETA_CHINA_URL",
+            "global": "PLACEHOLDER_BACKEND_BETA_GLOBAL_URL"
+          }
+        }
       }
     }
   ]

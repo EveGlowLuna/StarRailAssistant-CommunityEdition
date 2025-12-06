@@ -1,6 +1,6 @@
 [package]
 name = "starrailassistant"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Foreground program made for SRA-cli"
 authors = ["EveGlowLuna"]
 edition = "2021"
@@ -29,8 +29,10 @@ tokio = { version = "1", features = ["full"] }
 chrono = "0.4"
 regex = "1"
 base64 = "0.22"
+zip = "0.6"
+futures-util = "0.3"
 [target.'cfg(target_os = "windows")'.dependencies]
-windows = { version = "0.52", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_Security", "Win32_Security_Cryptography", "Win32_System_Memory"] }
+windows = { version = "0.52", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_Security", "Win32_Security_Cryptography", "Win32_System_Memory", "Win32_Storage_FileSystem"] }
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
 # Non-Windows platforms are not supported

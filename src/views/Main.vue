@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { House, SquareCheck, Plug, SquareTerminal, Settings } from 'lucide-vue-next'
 import NotificationSystem from '../components/NotificationSystem.vue'
@@ -63,7 +64,7 @@ import { useTranslation } from '../composables/useTranslation'
 const { t } = useTranslation()
 
 const route = useRoute()
-const appVersion = ref('0.1.0') // 从 package.json 获取版本号
+const appVersion = ref('0.1.0') // 从 Tauri 配置获取版本号
 const isExecutingTask = ref(false)
 let unlistenStatusChange: (() => void) | null = null
 
@@ -135,19 +136,117 @@ const checkDesktopShortcut = async () => {
   }
 }
 
+// 检查订阅更新
+const checkSubscriptionUpdates = async () => {
+  try {
+    // 获取订阅信息（可能为null）
+    const subscription = await invoke<any>('get_subscription')
+    
+    // 获取远程版本信息
+    const remoteData = await invoke<any>('get_remote_versions')
+    const latestVersions = remoteData['latest-version']
+    if (!latestVersions || !Array.isArray(latestVersions)) return
+    
+    // 获取当前版本
+    const frontendVersion = await invoke<string>('get_frontend_version')
+    const backendVersion = await invoke<any>('get_backend_version')
+    
+    const updates: string[] = []
+    
+    // 比较版本号函数
+    const compareVersions = (v1: string, v2: string): number => {
+      const parts1 = v1.split('.').map(Number)
+      const parts2 = v2.split('.').map(Number)
+      const maxLen = Math.max(parts1.length, parts2.length)
+      for (let i = 0; i < maxLen; i++) {
+        const p1 = parts1[i] || 0
+        const p2 = parts2[i] || 0
+        if (p1 > p2) return 1
+        if (p1 < p2) return -1
+      }
+      return 0
+    }
+    
+    // 检查前端更新
+    // 规则：没订阅 → 比对stable；订阅了 → 比对订阅的渠道
+    const frontendChannel = subscription?.frontend?.channel || 'stable'
+    const frontendChannelItem = latestVersions.find((item: any) => item[frontendChannel])
+    if (frontendChannelItem && frontendChannelItem[frontendChannel]) {
+      const remoteVersion = frontendChannelItem[frontendChannel].frontend?.version
+      if (remoteVersion && compareVersions(remoteVersion, frontendVersion) > 0) {
+        const channelText = frontendChannel === 'stable' 
+          ? t('home.notifications.stable').value 
+          : t('home.notifications.beta').value
+        updates.push(`${t('home.notifications.frontend').value} ${channelText} ${remoteVersion}`)
+      }
+    }
+    
+    // 检查后端更新
+    // 规则：没订阅 → 比对stable；订阅了 → 比对订阅的渠道
+    const backendChannel = subscription?.backend?.channel || 'stable'
+    const backendChannelItem = latestVersions.find((item: any) => item[backendChannel])
+    if (backendChannelItem && backendChannelItem[backendChannel]) {
+      const remoteVersion = backendChannelItem[backendChannel].backend?.version
+      if (remoteVersion && compareVersions(remoteVersion, backendVersion.version) > 0) {
+        const channelText = backendChannel === 'stable' 
+          ? t('home.notifications.stable').value 
+          : t('home.notifications.beta').value
+        updates.push(`${t('home.notifications.backend').value} ${channelText} ${remoteVersion}`)
+      }
+    }
+    
+    // 如果有更新，显示常驻通知
+    if (updates.length > 0) {
+      // 判断是否有订阅
+      const hasSubscription = subscription?.frontend || subscription?.backend
+      const updatesStr = updates.join('、')
+      const notificationText = hasSubscription 
+        ? t('home.notifications.foundSubscriptionUpdate').value.replace('{updates}', updatesStr)
+        : t('home.notifications.foundNewVersion').value.replace('{updates}', updatesStr)
+      
+      window.showPersistentNotification?.(
+        notificationText,
+        [
+          {
+            text: t('home.notifications.updateNow').value,
+            onClick: () => {
+              // 跳转到版本更新页面
+              window.open('/version-update', '_blank')
+            }
+          },
+          {
+            text: t('home.notifications.remindLater').value,
+            onClick: () => {
+              window.logToConsole?.('前端', 'INFO', t('home.notifications.userDelayedUpdate').value)
+            }
+          }
+        ]
+      )
+      await window.logToConsole?.('前端', 'INFO', `${hasSubscription ? t('home.notifications.foundSubscriptionUpdate').value.replace('{updates}', '') : t('home.notifications.foundNewVersion').value.replace('{updates}', '')}${updates.join(', ')}`)
+    }
+  } catch (error) {
+    console.error('Failed to check subscription updates:', error)
+  }
+}
+
 // 从 package.json 获取版本号
 onMounted(async () => {
   // 加载默认背景
   await loadDefaultBackground()
   
-  fetch('/package.json')
-    .then(response => response.json())
-    .then(data => {
-      appVersion.value = data.version
-    })
+  // 获取前端版本
+  try {
+    const version = await invoke<string>('get_frontend_version')
+    appVersion.value = version
+  } catch (error) {
+    console.error('Failed to load app version:', error)
+  }
   
   // 检查桌面快捷方式
   await checkDesktopShortcut()
+  
+  // 检查订阅更新
+  await checkSubscriptionUpdates()
   
   // 全局监听任务状态变化
   unlistenStatusChange = await listen<string>("sra-status-changed", (event) => {

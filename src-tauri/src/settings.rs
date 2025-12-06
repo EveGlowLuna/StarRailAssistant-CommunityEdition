@@ -77,6 +77,22 @@ impl Default for MainSettings {
     }
 }
 
+// 订阅信息
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "PascalCase")]
+pub struct SubscriptionInfo {
+    pub channel: String,
+    pub version: String,
+}
+
+// 订阅数据
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "PascalCase")]
+pub struct Subscription {
+    pub frontend: Option<SubscriptionInfo>,
+    pub backend: Option<SubscriptionInfo>,
+}
+
 // CE 专属设置（保存到 SRA-CE-Settings.json）
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "PascalCase")]
@@ -84,6 +100,14 @@ pub struct CESettings {
     pub wallpaper_path: Option<String>,
     #[serde(default)]
     pub skip_desktop_shortcut_prompt: bool,
+    #[serde(default = "default_download_region")]
+    pub download_region: String,
+    #[serde(default)]
+    pub subscription: Option<Subscription>,
+}
+
+fn default_download_region() -> String {
+    "china".to_string()
 }
 
 impl Default for CESettings {
@@ -91,6 +115,8 @@ impl Default for CESettings {
         Self {
             wallpaper_path: None,
             skip_desktop_shortcut_prompt: false,
+            download_region: "china".to_string(),
+            subscription: None,
         }
     }
 }
@@ -130,6 +156,7 @@ pub struct AppSettings {
     // CE专属设置
     pub wallpaper_path: Option<String>,
     pub skip_desktop_shortcut_prompt: bool,
+    pub download_region: String,
 }
 
 impl Default for AppSettings {
@@ -156,6 +183,7 @@ impl Default for AppSettings {
             enable_minimize_to_tray: false,
             wallpaper_path: None,
             skip_desktop_shortcut_prompt: false,
+            download_region: "china".to_string(),
         }
     }
 }
@@ -225,7 +253,37 @@ pub fn load_settings() -> Result<AppSettings, String> {
         enable_minimize_to_tray: main_settings.enable_minimize_to_tray,
         wallpaper_path: ce_settings.wallpaper_path,
         skip_desktop_shortcut_prompt: ce_settings.skip_desktop_shortcut_prompt,
+        download_region: ce_settings.download_region,
     })
+}
+
+// 单独保存下载区域设置
+pub fn save_download_region(region: String) -> Result<(), String> {
+    let ce_settings_file = get_ce_settings_file()?;
+    
+    // 读取现有的 CE 设置
+    let mut ce_settings = if ce_settings_file.exists() {
+        let content = fs::read_to_string(&ce_settings_file)
+            .map_err(|e| format!("Failed to read CE settings file: {}", e))?;
+        serde_json::from_str(&content).unwrap_or_else(|_| CESettings::default())
+    } else {
+        CESettings::default()
+    };
+    
+    // 更新下载区域
+    ce_settings.download_region = region;
+    
+    // 保存
+    if let Some(parent) = ce_settings_file.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create CE settings directory: {}", e))?;
+    }
+    let content = serde_json::to_string_pretty(&ce_settings)
+        .map_err(|e| format!("Failed to serialize CE settings: {}", e))?;
+    fs::write(&ce_settings_file, content)
+        .map_err(|e| format!("Failed to write CE settings file: {}", e))?;
+    
+    Ok(())
 }
 
 // 保存设置
@@ -305,14 +363,26 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
     fs::write(&main_settings_file, main_content)
         .map_err(|e| format!("Failed to write main settings file: {}", e))?;
 
-    // 分离 CE 设置
+    // 读取现有的 CE 设置以保留订阅信息
+    let ce_settings_file = get_ce_settings_file()?;
+    let existing_subscription = if ce_settings_file.exists() {
+        let content = fs::read_to_string(&ce_settings_file)
+            .map_err(|e| format!("Failed to read CE settings file: {}", e))?;
+        let existing: CESettings = serde_json::from_str(&content).unwrap_or_default();
+        existing.subscription
+    } else {
+        None
+    };
+
+    // 分离 CE 设置（保留订阅信息）
     let ce_settings = CESettings {
         wallpaper_path: settings.wallpaper_path,
         skip_desktop_shortcut_prompt: settings.skip_desktop_shortcut_prompt,
+        download_region: settings.download_region,
+        subscription: existing_subscription,
     };
 
     // 保存 CE 设置到 SRA-CE-Settings.json
-    let ce_settings_file = get_ce_settings_file()?;
     if let Some(parent) = ce_settings_file.parent() {
         fs::create_dir_all(parent)
             .map_err(|e| format!("Failed to create CE settings directory: {}", e))?;
@@ -322,5 +392,57 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
     fs::write(&ce_settings_file, ce_content)
         .map_err(|e| format!("Failed to write CE settings file: {}", e))?;
 
+    Ok(())
+}
+
+// 获取订阅信息
+pub fn get_subscription() -> Result<Option<Subscription>, String> {
+    let ce_settings_file = get_ce_settings_file()?;
+    
+    if ce_settings_file.exists() {
+        let content = fs::read_to_string(&ce_settings_file)
+            .map_err(|e| format!("Failed to read CE settings file: {}", e))?;
+        let ce_settings: CESettings = serde_json::from_str(&content).unwrap_or_default();
+        Ok(ce_settings.subscription)
+    } else {
+        Ok(None)
+    }
+}
+
+// 保存订阅信息
+pub fn save_subscription(sub_type: String, channel: String, version: String) -> Result<(), String> {
+    let ce_settings_file = get_ce_settings_file()?;
+    
+    // 读取现有的 CE 设置
+    let mut ce_settings = if ce_settings_file.exists() {
+        let content = fs::read_to_string(&ce_settings_file)
+            .map_err(|e| format!("Failed to read CE settings file: {}", e))?;
+        serde_json::from_str(&content).unwrap_or_else(|_| CESettings::default())
+    } else {
+        CESettings::default()
+    };
+    
+    // 更新订阅信息
+    let sub_info = SubscriptionInfo { channel, version };
+    let mut subscription = ce_settings.subscription.unwrap_or_default();
+    
+    match sub_type.as_str() {
+        "frontend" => subscription.frontend = Some(sub_info),
+        "backend" => subscription.backend = Some(sub_info),
+        _ => return Err(format!("Invalid subscription type: {}", sub_type)),
+    }
+    
+    ce_settings.subscription = Some(subscription);
+    
+    // 保存
+    if let Some(parent) = ce_settings_file.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create CE settings directory: {}", e))?;
+    }
+    let content = serde_json::to_string_pretty(&ce_settings)
+        .map_err(|e| format!("Failed to serialize CE settings: {}", e))?;
+    fs::write(&ce_settings_file, content)
+        .map_err(|e| format!("Failed to write CE settings file: {}", e))?;
+    
     Ok(())
 }

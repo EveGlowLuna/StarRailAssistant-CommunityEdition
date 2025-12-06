@@ -55,7 +55,7 @@
                 { label: '简体中文', value: 0 },
                 { label: 'English', value: 1 }
               ]"
-              placeholder="选择语言"
+              :placeholder="t('settings.interface.languagePlaceholder').value"
               @update:modelValue="onLanguageChange"
             />
           </div>
@@ -418,9 +418,7 @@ const hasChanges = computed(() => {
 })
 
 const languageNote = computed(() => {
-  return settings.language === 0 
-    ? '使用该程序进行自动化需要您游戏界面设置为简体中文'
-    : 'To use automation features, your game interface must be set to Simplified Chinese'
+  return t('settings.interface.languageNote').value
 })
 
 
@@ -504,10 +502,10 @@ const selectWallpaper = async () => {
     const selected = await open({
       multiple: false,
       filters: [
-        { name: '图片文件', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] },
-        { name: '所有文件', extensions: ['*'] }
+        { name: t('settings.wallpaperDialog.imageFiles').value, extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] },
+        { name: t('settings.wallpaperDialog.allFiles').value, extensions: ['*'] }
       ],
-      title: '选择壁纸'
+      title: t('settings.wallpaperDialog.title').value
     })
     
     if (!selected) {

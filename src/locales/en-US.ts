@@ -56,7 +56,17 @@ export default {
       taskCompleted: 'Task completed',
       coreRestarted: 'Core restarted successfully',
       coreStarted: 'Core started successfully',
-      coreRestartFailed: 'Failed to restart core, please check if SRA-cli exists or troubleshoot manually'
+      coreRestartFailed: 'Failed to restart core, please check if SRA-cli exists or troubleshoot manually',
+      // Update check
+      foundSubscriptionUpdate: 'Subscription update found: {updates}',
+      foundNewVersion: 'New version found: {updates}',
+      updateNow: 'Update Now',
+      remindLater: 'Remind Later',
+      userDelayedUpdate: 'User chose to update later',
+      frontend: 'Frontend',
+      backend: 'Backend',
+      stable: 'Stable',
+      beta: 'Beta'
     }
   },
 
@@ -406,9 +416,16 @@ export default {
     interface: {
       title: 'Interface Settings',
       language: 'Interface Language',
+      languagePlaceholder: 'Select Language',
       languageNote: 'To use automation features, your game interface must be set to Simplified Chinese',
       zoom: 'Screen Zoom',
       confidence: 'Image Recognition Confidence Threshold'
+    },
+    
+    wallpaperDialog: {
+      title: 'Select Wallpaper',
+      imageFiles: 'Image Files',
+      allFiles: 'All Files'
     },
     
     hotkeys: {
@@ -453,6 +470,97 @@ export default {
     },
     
     resetConfirm: 'Are you sure you want to reset all settings to default values?'
+  },
+
+  // Version Update
+  versionUpdate: {
+    title: 'Version Update',
+    currentVersion: 'Current Version',
+    availableVersions: 'Available Versions',
+    frontend: 'Frontend',
+    backend: 'Backend',
+    version: 'Version',
+    unknown: 'Unknown',
+    region: 'Download Region',
+    regions: {
+      china: 'China',
+      global: 'Global'
+    },
+    subscribed: 'Subscribed',
+    status: {
+      latest: 'Latest',
+      outdated: 'Outdated',
+      missing: 'Missing',
+      community: 'Community',
+      official: 'Official'
+    },
+    channels: {
+      stable: 'Stable',
+      beta: 'Beta'
+    },
+    actions: {
+      checkIntegrity: 'Check Integrity',
+      downloadAndInstall: 'Download & Install',
+      subscribe: 'Subscribe',
+      cancelDownload: 'Cancel',
+      install: 'Install Now',
+      installing: 'Installing...'
+    },
+    download: {
+      title: 'Downloading Update...',
+      speed: 'Speed',
+      remaining: 'Remaining',
+      about: 'About',
+      seconds: 'seconds',
+      minutes: 'minutes',
+      completed: 'Download Completed',
+      failed: 'Download Failed',
+      cancelled: 'Download Cancelled',
+      urlNotFound: 'Download URL not found',
+      insufficientSpace: 'Insufficient disk space',
+      verificationFailed: 'File verification failed',
+      alreadyDownloading: 'A download is already in progress',
+      versionInfoNotLoaded: 'Version info not loaded',
+      insufficientSpaceBytes: 'Insufficient disk space, need {size} bytes',
+      starting: 'Starting download: {fileName} ({channel})',
+      downloadComplete: 'Download complete: {fileName}',
+      downloadFailed: 'Download failed: {error}',
+      userCancelled: 'User cancelled download'
+    },
+    install: {
+      title: 'Ready to Install Update',
+      confirmMessage: 'Download completed! Ready to install:',
+      size: 'Size',
+      channel: 'Channel',
+      willExit: 'The application will exit and install the update automatically. It will restart after installation.',
+      backendUpdate: 'Updating Backend...',
+      backendSteps: {
+        download: 'Download Completed',
+        stop: 'Stopping Backend',
+        extract: 'Extracting Files',
+        restart: 'Restarting Backend'
+      },
+      pleaseWait: 'Please wait, do not close the application...',
+      success: 'Update Successful!',
+      failed: 'Update Failed',
+      userCancelled: 'User cancelled installation',
+      tempFileCleaned: 'Temp file cleaned',
+      startingFrontend: 'Starting frontend update: {version}',
+      startingBackend: 'Starting backend update: {version}',
+      stoppingBackend: 'Stopping backend process...',
+      extractingFiles: 'Extracting update files...',
+      restartingBackend: 'Restarting backend process...',
+      backendComplete: 'Backend update complete!',
+      installFailed: 'Installation failed: {error}'
+    },
+    subscribe: {
+      success: 'Subscribed to {type} {channel} {version}',
+      failed: 'Subscription failed',
+      logMessage: 'Subscribed to {type}: {channel} {version}'
+    },
+    loading: 'Loading version info...',
+    error: 'Failed to load version info',
+    retry: 'Retry'
   },
 
   // Common

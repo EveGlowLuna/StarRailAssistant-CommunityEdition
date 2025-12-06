@@ -50,6 +50,17 @@ pub fn run() {
             commands::check_desktop_shortcut_needed,
             commands::create_desktop_shortcut,
             commands::save_skip_shortcut_prompt,
+            commands::get_frontend_version,
+            commands::get_backend_version,
+            commands::get_remote_versions,
+            commands::download_update,
+            commands::install_frontend_update,
+            commands::install_backend_update,
+            commands::get_subscription,
+            commands::save_subscription,
+            commands::save_download_region,
+            commands::check_disk_space,
+            commands::delete_temp_file,
             #[cfg(target_os = "windows")]
             commands::run_elevated_command
         ])

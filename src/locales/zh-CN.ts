@@ -56,7 +56,17 @@ export default {
       taskCompleted: '任务执行完成',
       coreRestarted: '核心重启成功',
       coreStarted: '核心启动成功',
-      coreRestartFailed: '核心重启失败，请检查SRA-cli是否存在或手动排查问题'
+      coreRestartFailed: '核心重启失败，请检查SRA-cli是否存在或手动排查问题',
+      // 更新检查
+      foundSubscriptionUpdate: '发现订阅更新：{updates}',
+      foundNewVersion: '发现新版本：{updates}',
+      updateNow: '立即更新',
+      remindLater: '稍后提醒',
+      userDelayedUpdate: '用户选择稍后更新',
+      frontend: '前端',
+      backend: '后端',
+      stable: '正式版',
+      beta: '测试版'
     }
   },
 
@@ -406,9 +416,16 @@ export default {
     interface: {
       title: '界面设置',
       language: '界面语言',
+      languagePlaceholder: '选择语言',
       languageNote: '使用该程序进行自动化需要您游戏界面设置为简体中文',
       zoom: '屏幕缩放比例',
       confidence: '识图置信度阈值'
+    },
+    
+    wallpaperDialog: {
+      title: '选择壁纸',
+      imageFiles: '图片文件',
+      allFiles: '所有文件'
     },
     
     hotkeys: {
@@ -453,6 +470,97 @@ export default {
     },
     
     resetConfirm: '确定要重置所有设置为默认值吗？'
+  },
+
+  // 版本更新
+  versionUpdate: {
+    title: '版本更新',
+    currentVersion: '当前版本',
+    availableVersions: '可用版本',
+    frontend: '前端',
+    backend: '后端',
+    version: '版本',
+    unknown: '未知',
+    region: '下载区域',
+    regions: {
+      china: '中国',
+      global: '全球'
+    },
+    subscribed: '已订阅',
+    status: {
+      latest: '最新',
+      outdated: '过期',
+      missing: '缺失',
+      community: '社区版',
+      official: '官方版'
+    },
+    channels: {
+      stable: '正式版',
+      beta: '测试版'
+    },
+    actions: {
+      checkIntegrity: '检查资源完整性',
+      downloadAndInstall: '下载并安装',
+      subscribe: '订阅',
+      cancelDownload: '取消下载',
+      install: '立即安装',
+      installing: '安装中...'
+    },
+    download: {
+      title: '正在下载更新...',
+      speed: '下载速度',
+      remaining: '剩余时间',
+      about: '约',
+      seconds: '秒',
+      minutes: '分钟',
+      completed: '下载完成',
+      failed: '下载失败',
+      cancelled: '下载已取消',
+      urlNotFound: '下载地址未找到',
+      insufficientSpace: '磁盘空间不足',
+      verificationFailed: '文件校验失败',
+      alreadyDownloading: '已有下载任务正在进行',
+      versionInfoNotLoaded: '版本信息未加载',
+      insufficientSpaceBytes: '磁盘空间不足，需要 {size} 字节',
+      starting: '开始下载: {fileName} ({channel})',
+      downloadComplete: '下载完成: {fileName}',
+      downloadFailed: '下载失败: {error}',
+      userCancelled: '用户取消下载'
+    },
+    install: {
+      title: '准备安装更新',
+      confirmMessage: '下载完成！即将安装以下更新：',
+      size: '大小',
+      channel: '渠道',
+      willExit: '应用将自动退出并安装更新，安装完成后会自动启动新版本。',
+      backendUpdate: '正在更新后端...',
+      backendSteps: {
+        download: '下载完成',
+        stop: '停止后端进程',
+        extract: '解压文件',
+        restart: '重启后端进程'
+      },
+      pleaseWait: '请稍候，不要关闭应用...',
+      success: '更新成功！',
+      failed: '更新失败',
+      userCancelled: '用户取消安装',
+      tempFileCleaned: '已清理临时文件',
+      startingFrontend: '开始安装前端更新: {version}',
+      startingBackend: '开始安装后端更新: {version}',
+      stoppingBackend: '正在停止后端进程...',
+      extractingFiles: '正在解压更新文件...',
+      restartingBackend: '正在重启后端进程...',
+      backendComplete: '后端更新完成！',
+      installFailed: '安装失败: {error}'
+    },
+    subscribe: {
+      success: '已订阅{type} {channel} {version}',
+      failed: '订阅失败',
+      logMessage: '订阅{type}版本: {channel} {version}'
+    },
+    loading: '加载版本信息中...',
+    error: '加载版本信息失败',
+    retry: '重试'
   },
 
   // 通用
