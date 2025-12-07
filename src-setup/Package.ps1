@@ -64,11 +64,11 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 }
 
-# Create zip archive
+# 打包SRA-cli核心
 Write-Host "Creating zip archive..."
-$zipFileName = "StarRailAssistant-$version-portable.zip"
+$zipFileName = "StarRailAssistant-Core-$version.zip"
 $zipPath = Join-Path $outputDir $zipFileName
-Compress-Archive -Path "$targetDir\*" -DestinationPath $zipPath -Force
+Compress-Archive -Path "StarRailAssistant\*" -DestinationPath $zipPath -Force
 Write-Host "Zip archive created: $zipFileName"
 
 # Compile with Inno Setup

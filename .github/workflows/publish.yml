@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Repo Check
         run: |
-          if [[ "$GITHUB_REPOSITORY" != "Shasnow/StarRailAssistant" ]]; then
+          if [[ "$GITHUB_REPOSITORY" != "EveGlowLuna/StarRailAssistant-CommunityEdition" ]]; then
             echo "When forking this repository to make your own builds, you have to adjust this check."
             exit 1
           fi
@@ -43,87 +43,61 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Install .NET 8.0 Core
-        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
-        
-      - name: Publish StarRailAssistant
-        run: |
-          dotnet publish -c Release -r win-x64 .\SRAFrontend\SRAFrontend.sln
+          submodules: recursive
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Node dependencies
+        run: npm install
         
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           
-      - name: Install dependencies
+      - name: Build Python package
         run: |
+          cd SRA-CE-cil
           python -m pip install --upgrade pip
           pip install flake8 pytest
           pip install -r requirements.txt
-
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-          
-      - name: Built with package.py
-        run: |
           python package.py
+          cd ..
           
-      - name: Read version
-        id: read_version
+      - name: Read version and channel
+        id: read_info
         run: |
-          $VERSION=(Get-Content -Path "version_info.txt" -TotalCount 1).Trim()
-          $CHANNEL=$VERSION.Contains("-beta") ? "beta" : "stable"
+          $VERSION=(Get-Content -Path "package.json" | ConvertFrom-Json).version
+          $CHANNEL=(Get-Content -Path "information.md" -TotalCount 1).Replace("channel:", "").Trim()
           "version=$VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
           "channel=$CHANNEL" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "Version: $VERSION"
+          echo "Channel: $CHANNEL"
           
       - name: Install Inno Setup
         run: |
           choco install innosetup --no-progress --yes
-         
-      - name: Prepare for Inno Setup
-        run: |
-          Expand-Archive -Path StarRailAssistant_${{ env.version }}.zip -DestinationPath StarRailAssistant
-          Copy-Item version_info.txt -Destination setup\install_info.txt -Force
           
-      - name: Build Installer
-        run: |
-          New-Item -ItemType Directory -Path setup\SRA -Force
-          Copy-Item -Path StarRailAssistant\* -Destination setup\SRA -Force -Recurse
-          New-Item -ItemType Directory -Path setup\output -Force
-          python setup/version_modifier.py --version "${{ env.version }}"
-          iscc setup\srasetup.iss
-          Copy-Item -Path setup\output\* -Destination . -Force
+      - name: Build project
+        run: npm run package
           
       - name: Upload Setup Artifact
         uses: actions/upload-artifact@v4
         with:
           name: StarRailAssistant_${{ env.version }}_setup
-          path: StarRailAssistant_${{ env.version }}_Setup.exe
+          path: src-setup/output/StarRailAssistant_${{ env.version }}_Setup.exe
+          
       - name: Upload zip Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: StarRailAssistant_${{ env.version }}
-          path: StarRailAssistant_${{ env.version }}.zip
-          
-      - name: Upload Version_Info Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: version_info
-          path: version_info.txt
-          
-      - name: Upload to R2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        run: |
-          aws s3 cp StarRailAssistant_${{ env.version }}.zip s3://sra/ --endpoint-url=https://955e419b52a8b9fa05c04e29cfb0b17f.r2.cloudflarestorage.com --checksum-algorithm CRC32 --force
+          name: StarRailAssistant-Core-${{ env.version }}
+          path: src-setup/output/StarRailAssistant-Core-${{ env.version }}.zip
           
   publish_release:
     name: Publish release
@@ -132,21 +106,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: StarRailAssistant_*
+          pattern: StarRailAssistant*
           merge-multiple: true
           path: artifacts
-      - name: Download Version_Info
-        uses: actions/download-artifact@v4
-        with:
-          name: version_info
-          path: ./
+          
+      - name: Read version and channel
+        id: read_info
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          CHANNEL=$(head -n 1 information.md | sed 's/channel://g' | sed 's/\r$//g' | xargs)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Channel: $CHANNEL"
+          
+      - name: Prepare release notes
+        id: prepare_notes
+        run: |
+          NOTES=$(tail -n +4 information.md)
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
       - name: Check if release exists
         id: check_if_release_exists
         run: |
-          release_id=$(gh release view $(sed 's/\r$//g' <(head -n 1 version_info.txt)) --json id --jq .id || true)
+          release_id=$(gh release view "v${{ steps.read_info.outputs.version }}" --json id --jq .id || true)
           if [[ -z $release_id ]]; then
             echo "release_exists=false" >> $GITHUB_OUTPUT
           else
@@ -154,40 +143,41 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          
       - name: Create release
         id: create_release
         if: steps.check_if_release_exists.outputs.release_exists == 'false'
         run: |
           set -xe
           shopt -s nullglob
-          NAME="$(sed 's/\r$//g' <(head -n 1 version_info.txt))"
-          TAGNAME="$(sed 's/\r$//g' <(head -n 1 version_info.txt))"
-          NOTES_MAIN="$(sed 's/\r$//g' <(tail -n +3 version_info.txt))"
-          NOTES="$NOTES_MAIN
+          TAGNAME="v${{ steps.read_info.outputs.version }}"
+          NAME="StarRailAssistant Community Edition v${{ steps.read_info.outputs.version }}"
+          CHANNEL="${{ steps.read_info.outputs.channel }}"
           
-          [已有 Mirror酱 CDK ？前往 Mirror酱 高速下载](https://mirrorchyan.com/zh/projects?rid=StarRailAssistant&source=sra-release)
-          下载说明: zip包-免安装版; setup-免解压一键安装版
-
-          \`\`\`本release通过GitHub Actions自动构建\`\`\`"
-          gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "$NOTES" --prerelease artifacts/*
+          if [[ "$CHANNEL" == "beta" ]]; then
+            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" --prerelease artifacts/*
+          else
+            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" artifacts/*
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          
       - name: Update release
         if: steps.check_if_release_exists.outputs.release_exists == 'true'
         run: |
           set -xe
           shopt -s nullglob
-          NAME="$(sed 's/\r$//g' <(head -n 1 version_info.txt))"
-          TAGNAME="$(sed 's/\r$//g' <(head -n 1 version_info.txt))"
-          NOTES_MAIN="$(sed 's/\r$//g' <(tail -n +3 version_info.txt))"
-          NOTES="$NOTES_MAIN
+          TAGNAME="v${{ steps.read_info.outputs.version }}"
+          NAME="StarRailAssistant Community Edition v${{ steps.read_info.outputs.version }}"
+          CHANNEL="${{ steps.read_info.outputs.channel }}"
           
-          [已有 Mirror酱 CDK ？前往 Mirror酱 高速下载](https://mirrorchyan.com/zh/projects?rid=StarRailAssistant&source=sra-release)
-          下载说明: zip包-免安装版; setup-免解压一键安装版
-
-          \`\`\`本release通过GitHub Actions自动构建\`\`\`"
           gh release delete "$TAGNAME" --yes
-          gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "$NOTES" --prerelease artifacts/*
+          
+          if [[ "$CHANNEL" == "beta" ]]; then
+            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" --prerelease artifacts/*
+          else
+            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" artifacts/*
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 
