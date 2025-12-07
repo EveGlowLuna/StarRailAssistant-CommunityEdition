@@ -1,6 +1,6 @@
 [package]
 name = "starrailassistant"
-version = "0.1.1"
+version = "0.1.0"
 description = "A Foreground program made for SRA-cli"
 authors = ["EveGlowLuna"]
 edition = "2021"
