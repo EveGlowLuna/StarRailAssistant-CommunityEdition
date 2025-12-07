@@ -167,13 +167,18 @@ const checkSubscriptionUpdates = async () => {
       return 0
     }
     
+    // 判断是否有订阅
+    const hasSubscription = subscription?.frontend || subscription?.backend
+    
     // 检查前端更新
     // 规则：没订阅 → 比对stable；订阅了 → 比对订阅的渠道
     const frontendChannel = subscription?.frontend?.channel || 'stable'
     const frontendChannelItem = latestVersions.find((item: any) => item[frontendChannel])
+    let hasFrontendUpdate = false
     if (frontendChannelItem && frontendChannelItem[frontendChannel]) {
       const remoteVersion = frontendChannelItem[frontendChannel].frontend?.version
       if (remoteVersion && compareVersions(remoteVersion, frontendVersion) > 0) {
+        hasFrontendUpdate = true
         const channelText = frontendChannel === 'stable' 
           ? t('home.notifications.stable').value 
           : t('home.notifications.beta').value
@@ -182,23 +187,26 @@ const checkSubscriptionUpdates = async () => {
     }
     
     // 检查后端更新
-    // 规则：没订阅 → 比对stable；订阅了 → 比对订阅的渠道
-    const backendChannel = subscription?.backend?.channel || 'stable'
-    const backendChannelItem = latestVersions.find((item: any) => item[backendChannel])
-    if (backendChannelItem && backendChannelItem[backendChannel]) {
-      const remoteVersion = backendChannelItem[backendChannel].backend?.version
-      if (remoteVersion && compareVersions(remoteVersion, backendVersion.version) > 0) {
-        const channelText = backendChannel === 'stable' 
-          ? t('home.notifications.stable').value 
-          : t('home.notifications.beta').value
-        updates.push(`${t('home.notifications.backend').value} ${channelText} ${remoteVersion}`)
+    // 规则：
+    // 1. 没订阅 + 前端有更新 → 跳过后端检查（因为前端安装程序包含后端）
+    // 2. 没订阅 + 前端无更新 → 比对stable
+    // 3. 有订阅 → 比对订阅的渠道
+    if (hasSubscription || !hasFrontendUpdate) {
+      const backendChannel = subscription?.backend?.channel || 'stable'
+      const backendChannelItem = latestVersions.find((item: any) => item[backendChannel])
+      if (backendChannelItem && backendChannelItem[backendChannel]) {
+        const remoteVersion = backendChannelItem[backendChannel].backend?.version
+        if (remoteVersion && compareVersions(remoteVersion, backendVersion.version) > 0) {
+          const channelText = backendChannel === 'stable' 
+            ? t('home.notifications.stable').value 
+            : t('home.notifications.beta').value
+          updates.push(`${t('home.notifications.backend').value} ${channelText} ${remoteVersion}`)
+        }
       }
     }
     
     // 如果有更新，显示常驻通知
     if (updates.length > 0) {
-      // 判断是否有订阅
-      const hasSubscription = subscription?.frontend || subscription?.backend
       const updatesStr = updates.join('、')
       const notificationText = hasSubscription 
         ? t('home.notifications.foundSubscriptionUpdate').value.replace('{updates}', updatesStr)

@@ -395,7 +395,7 @@ export default {
     releaseAnnouncement: '最新版本公告',
     otherAnnouncements: '其他公告',
     loading: '加载中...',
-    error: '公告获取失败：如果你没挂梯子，那这不是你的问题，这可能是由于服务器未运行或被攻击。',
+    error: '公告获取失败：这不是你的问题，这可能是由于服务器未运行或被攻击。',
     retry: '重试',
     noAnnouncements: '暂无公告'
   },

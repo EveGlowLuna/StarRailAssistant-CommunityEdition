@@ -13,13 +13,13 @@
                 </div>
             </div>
 
-            <!-- 加载状�?-->
+            <!-- 加载状 -->
             <div class="loading-state" v-if="loading">
                 <RefreshCw class="spinning loading-icon" :size="32" />
                 <span class="loading-text">{{ t('versionUpdate.loading') }}</span>
             </div>
 
-            <!-- 错误状�?-->
+            <!-- 错误状 -->
             <div class="error-state" v-else-if="error">
                 <AlertCircle :size="32" class="error-icon" />
                 <span class="error-text">{{ t('versionUpdate.error') }}</span>
@@ -83,7 +83,7 @@
                 <div class="version-section">
                     <h3 class="section-title">{{ t('versionUpdate.availableVersions') }}</h3>
                     <div class="version-cards">
-                        <!-- Stable �?Beta 渠道 -->
+                        <!-- Stable Beta 渠道 -->
                         <template v-for="channel in (['stable', 'beta'] as const)" :key="channel">
                             <!-- 前端版本 -->
                             <div class="version-card">
@@ -156,7 +156,7 @@
             </div>
         </div>
 
-        <!-- 下载进度对话�?-->
+        <!-- 下载进度对话 -->
         <div v-if="downloadState.isDownloading" class="modal-overlay">
             <div class="modal-dialog download-dialog">
                 <h3 class="modal-title">{{ t('versionUpdate.download.title') }}</h3>
@@ -182,7 +182,7 @@
             </div>
         </div>
 
-        <!-- 安装确认对话�?-->
+        <!-- 安装确认对话 -->
         <div v-if="showInstallConfirm" class="modal-overlay">
             <div class="modal-dialog install-dialog">
                 <h3 class="modal-title">{{ t('versionUpdate.install.title') }}</h3>
@@ -217,7 +217,7 @@
             </div>
         </div>
 
-        <!-- 后端更新进度对话�?-->
+        <!-- 后端更新进度对话 -->
         <div v-if="showBackendProgress" class="modal-overlay">
             <div class="modal-dialog backend-dialog">
                 <h3 class="modal-title">{{ t('versionUpdate.install.backendUpdate') }}</h3>
@@ -269,7 +269,7 @@ const windowRef = ref<HTMLElement | null>(null);
 const loading = ref(true);
 const error = ref(false);
 
-// 下载状�?
+// 下载状态
 const downloadState = ref({
     isDownloading: false,
     progress: 0,
@@ -282,7 +282,7 @@ const downloadState = ref({
     canCancel: true // 是否可以取消下载
 });
 
-// 安装状�?
+// 安装状态
 const showInstallConfirm = ref(false);
 const installing = ref(false);
 const installInfo = ref({
@@ -331,10 +331,10 @@ const regionOptions = computed(() => [
     { label: t('versionUpdate.regions.global').value, value: 'global' }
 ]);
 
-// 完整的远程版本数据（包含download-url�?
+// 完整的远程版本数据（包含download-url）
 const fullRemoteData = ref<any>(null);
 
-// 订阅信息（前端和后端分别订阅�?
+// 订阅信息（前端和后端分别订阅）
 const subscription = ref<{ 
     frontend?: { channel: string; version: string };
     backend?: { channel: string; version: string };
@@ -363,7 +363,7 @@ const loadVersionInfo = async () => {
     error.value = false;
 
     try {
-        // 1. 获取前端版本（从 Tauri 配置�?
+        // 1. 获取前端版本（从 Tauri 配置）
         try {
             const version = await invoke<string>('get_frontend_version');
             currentVersions.value.frontend = version || t('versionUpdate.unknown').value;
@@ -372,7 +372,7 @@ const loadVersionInfo = async () => {
             currentVersions.value.frontend = t('versionUpdate.unknown').value;
         }
 
-        // 2. 获取后端版本和渠道（�?StarRailAssistant/version.json�?
+        // 2. 获取后端版本和渠道（从 StarRailAssistant/version.json）
         try {
             const backendVersion = await invoke<{ version: string; channel: string }>('get_backend_version');
             currentVersions.value.backend = backendVersion.version;
@@ -399,7 +399,7 @@ const loadVersionInfo = async () => {
                 throw new Error('Invalid remote version data structure');
             }
             
-            // 找到 stable �?beta 版本
+            // 找到 stable 和 beta 版本
             const stableItem = latestVersions.find((item: any) => item.stable);
             const betaItem = latestVersions.find((item: any) => item.beta);
             
@@ -425,7 +425,7 @@ const loadVersionInfo = async () => {
             }
         } catch (err) {
             console.error('Failed to load remote version info:', err);
-            // 使用默认�?
+            // 使用默认值
             remoteVersions.value = {
                 stable: { frontend: '0.0.0', backend: '0.0.0' },
                 beta: { frontend: '0.0.0', backend: '0.0.0' }
@@ -459,8 +459,8 @@ const loadVersionInfo = async () => {
     }
 };
 
-// 比较版本�?
-// 新规则：最后一位数字不�?表示测试版（�?.1.1），最后一位为0表示正式版（�?.2.0�?
+// 比较版本号
+// 新规则：最后一位数字不为0表示测试版（如0.1.1），最后一位为0表示正式版（如0.2.0）
 const compareVersions = (v1: string, v2: string): number => {
     const parts1 = v1.split('.').map(Number);
     const parts2 = v2.split('.').map(Number);
@@ -478,7 +478,7 @@ const compareVersions = (v1: string, v2: string): number => {
     return 0;
 };
 
-// 判断版本是否为测试版（最后一位不�?�?
+// 判断版本是否为测试版（最后一位不为0）
 const isBetaVersion = (version: string): boolean => {
     const parts = version.split('.');
     if (parts.length === 0) return false;
@@ -497,7 +497,7 @@ const getFrontendChannelText = (): string => {
         : t('versionUpdate.channels.stable').value;
 };
 
-// 获取前端渠道样式�?
+// 获取前端渠道样式类
 const getFrontendChannelClass = (): string => {
     const version = currentVersions.value.frontend;
     if (version === t('versionUpdate.unknown').value) {
@@ -517,7 +517,7 @@ const getBackendChannelText = (): string => {
         : t('versionUpdate.channels.stable').value;
 };
 
-// 获取后端渠道样式�?
+// 获取后端渠道样式类
 const getBackendChannelClass = (): string => {
     const version = currentVersions.value.backend;
     if (version === t('versionUpdate.unknown').value) {
@@ -530,12 +530,12 @@ const getBackendChannelClass = (): string => {
 const getBackendStatus = (): string => {
     const current = currentVersions.value.backend;
     
-    // 如果后端版本未知，返�?missing 状�?
+    // 如果后端版本未知，返回 missing 状态
     if (current === t('versionUpdate.unknown').value) {
         return 'missing';
     }
     
-    // 始终�?stable 渠道的最新版本比�?
+    // 始终与 stable 渠道的最新版本比较
     const latestStable = remoteVersions.value.stable.backend;
     return compareVersions(current, latestStable) < 0 ? 'outdated' : 'latest';
 };
@@ -550,28 +550,28 @@ const getBackendStatusText = (): string => {
         : t('versionUpdate.status.outdated').value;
 };
 
-// 判断是否应该显示状态标�?
+// 判断是否应该显示状态标签
 const shouldShowStatus = (channel: 'stable' | 'beta'): boolean => {
-    // stable 渠道不显示状�?
-    // beta 渠道显示状�?
+    // stable 渠道不显示状态
+    // beta 渠道显示状态
     return channel === 'beta';
 };
 
-// 获取远程版本状态（仅用�?beta 渠道�?
+// 获取远程版本状态（仅用于 beta 渠道）
 const getRemoteStatus = (channel: 'stable' | 'beta', type: 'frontend' | 'backend'): string => {
     if (channel !== 'beta') {
         return 'latest'; // stable 不显示，这里返回值不重要
     }
     
-    // Beta 渠道：比�?beta 版本�?stable 版本
+    // Beta 渠道：比较 beta 版本和 stable 版本
     const betaVersion = remoteVersions.value.beta[type];
     const stableVersion = remoteVersions.value.stable[type];
     
-    // 比较版本�?
+    // 比较版本号
     const result = compareVersions(betaVersion, stableVersion);
     
-    // beta 版本 >= stable 版本 �?最�?
-    // beta 版本 < stable 版本 �?过期
+    // beta 版本 >= stable 版本 → 最新
+    // beta 版本 < stable 版本 → 过期
     return result >= 0 ? 'latest' : 'outdated';
 };
 
@@ -581,7 +581,7 @@ const getRemoteStatusText = (channel: 'stable' | 'beta', type: 'frontend' | 'bac
         : t('versionUpdate.status.outdated').value;
 };
 
-// 格式化字�?
+// 格式化字节
 const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -590,7 +590,7 @@ const formatBytes = (bytes: number): string => {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 };
 
-// 格式化时�?
+// 格式化时间
 const formatTime = (seconds: number): string => {
     if (seconds < 60) {
         return Math.round(seconds) + ' ' + t('versionUpdate.download.seconds').value;
@@ -618,7 +618,7 @@ const getDownloadUrl = (channel: 'stable' | 'beta', type: string): string => {
     return downloadUrls[downloadRegion.value] || downloadUrls.china || '';
 };
 
-// 获取文件�?
+// 获取文件名
 const getFileName = (channel: 'stable' | 'beta', type: string): string => {
     const version = type === 'frontend' 
         ? remoteVersions.value[channel].frontend 
@@ -631,7 +631,7 @@ const getFileName = (channel: 'stable' | 'beta', type: string): string => {
     }
 };
 
-// 下载和安装操�?
+// 下载和安装操作
 const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
     // 防止并发下载
     if (downloadState.value.isDownloading) {
@@ -653,7 +653,7 @@ const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
             ? remoteVersions.value[channel].frontend 
             : remoteVersions.value[channel].backend;
         
-        // 2. 获取文件大小并检查磁盘空�?
+        // 2. 获取文件大小并检查磁盘空间
         if (!fullRemoteData.value) {
             window.showNotification?.(t('versionUpdate.download.versionInfoNotLoaded').value, 3000);
             return;
@@ -682,7 +682,7 @@ const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
             }
         }
         
-        // 3. 显示下载对话�?
+        // 3. 显示下载对话框
         downloadState.value = {
             isDownloading: true,
             progress: 0,
@@ -712,7 +712,7 @@ const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
             });
         }
         
-        // 5. 开始下�?
+        // 5. 开始下载
         await window.logToConsole?.('前端', 'INFO', t('versionUpdate.download.starting').value.replace('{fileName}', fileName).replace('{channel}', channel));
         
         const filePath = await invoke<string>('download_update', {
@@ -736,7 +736,7 @@ const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
             filePath
         };
         
-        // 7. 显示安装确认对话�?
+        // 7. 显示安装确认对话框
         showInstallConfirm.value = true;
         
     } catch (error) {
@@ -748,7 +748,7 @@ const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
         window.showNotification?.(t('versionUpdate.download.failed').value, 3000);
         await window.logToConsole?.('前端', 'ERR', t('versionUpdate.download.downloadFailed').value.replace('{error}', errorMsg));
         
-        // 清理可能存在的临时文�?
+        // 清理可能存在的临时文件
         if (downloadState.value.filePath) {
             try {
                 await invoke('delete_temp_file', { filePath: downloadState.value.filePath });
@@ -769,7 +769,7 @@ const cancelDownload = async () => {
     
     await window.logToConsole?.('前端', 'WARN', t('versionUpdate.download.userCancelled').value);
     
-    // 清理下载的临时文�?
+    // 清理下载的临时文件
     if (downloadState.value.filePath) {
         try {
             await invoke('delete_temp_file', { filePath: downloadState.value.filePath });
@@ -778,7 +778,7 @@ const cancelDownload = async () => {
         }
     }
     
-    // 清理事件监听�?
+    // 清理事件监听器
     if (unlistenDownload) {
         unlistenDownload();
         unlistenDownload = null;
@@ -792,7 +792,7 @@ const cancelInstall = async () => {
     
     await window.logToConsole?.('前端', 'WARN', t('versionUpdate.install.userCancelled').value);
     
-    // 清理下载的文�?
+    // 清理下载的文 
     if (installInfo.value.filePath) {
         try {
             await invoke('delete_temp_file', { filePath: installInfo.value.filePath });
@@ -814,7 +814,7 @@ const confirmInstall = async () => {
             await invoke('install_frontend_update', {
                 installerPath: installInfo.value.filePath
             });
-            // 应用会自动退�?
+            // 应用会自动退 
         } else {
             // 后端更新：显示进度对话框
             showInstallConfirm.value = false;
@@ -852,7 +852,7 @@ const confirmInstall = async () => {
                 });
             }
             
-            // 开始后端更�?
+            // 开始后端更 
             await invoke('install_backend_update', {
                 zipPath: installInfo.value.filePath
             });
@@ -880,7 +880,7 @@ const subscribe = async (channel: 'stable' | 'beta', type: 'frontend' | 'backend
             version
         });
         
-        // 更新订阅状�?
+        // 更新订阅状 
         if (!subscription.value) {
             subscription.value = {};
         }
@@ -905,7 +905,7 @@ const isSubscribed = (channel: 'stable' | 'beta', type: 'frontend' | 'backend'):
     return subscription.value?.[type]?.channel === channel;
 };
 
-// 监听下载区域变化并保�?
+// 监听下载区域变化并保 
 watch(downloadRegion, async (newRegion) => {
     try {
         await invoke('save_download_region', { region: newRegion });
@@ -931,7 +931,7 @@ onUnmounted(() => {
         unlistenBackendProgress = null;
     }
     
-    // 如果正在下载，记录警�?
+    // 如果正在下载，记录警 
     if (downloadState.value.isDownloading) {
         console.warn('Component unmounted while download in progress');
     }
@@ -1445,7 +1445,7 @@ onUnmounted(() => {
   background: rgba(33, 150, 243, 1);
 }
 
-/* 下载对话�?*/
+/* 下载对话 */
 .download-content {
   text-align: center;
 }
@@ -1487,7 +1487,7 @@ onUnmounted(() => {
   margin-bottom: 8px;
 }
 
-/* 安装对话�?*/
+/* 安装对话 */
 .install-content p {
   margin: 0 0 16px 0;
   color: rgba(0, 0, 0, 0.8);
@@ -1526,7 +1526,7 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-/* 后端更新对话�?*/
+/* 后端更新对话 */
 .backend-content {
   padding: 8px 0;
 }

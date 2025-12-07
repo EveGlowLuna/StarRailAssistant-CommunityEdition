@@ -395,7 +395,7 @@ export default {
     releaseAnnouncement: 'Latest Release',
     otherAnnouncements: 'Other Announcements',
     loading: 'Loading...',
-    error: 'Failed to load announcements: If you are not using a VPN, this is not your fault. The server may be down or under attack.',
+    error: 'Failed to load announcements: This is not your fault. The server may be down or under attack.',
     retry: 'Retry',
     noAnnouncements: 'No announcements available'
   },
