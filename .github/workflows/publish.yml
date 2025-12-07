@@ -58,6 +58,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+          cache: false
         
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -92,17 +93,17 @@ jobs:
       - name: Build project
         run: npm run package
           
-      - name: Upload Setup Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: StarRailAssistant_${{ env.version }}_setup
-          path: src-setup/output/StarRailAssistant_${{ env.version }}_Setup.exe
-          
       - name: Upload zip Artifact
         uses: actions/upload-artifact@v4
         with:
           name: StarRailAssistant-Core-${{ env.version }}
           path: src-setup/output/StarRailAssistant-Core-${{ env.version }}.zip
+          
+      - name: Upload Setup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StarRailAssistant_${{ env.version }}_setup
+          path: src-setup/output/StarRailAssistant_${{ env.version }}_Setup.exe
           
   publish_release:
     name: Publish release
@@ -135,6 +136,11 @@ jobs:
           NOTES=$(tail -n +4 information.md)
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "---" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Setup.exe - 程序安装包 (Program Installer)" >> $GITHUB_OUTPUT
+          echo "Core.zip - 后端核心程序 (Backend Core Program)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
       - name: Check if release exists
