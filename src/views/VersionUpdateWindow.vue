@@ -615,7 +615,15 @@ const getDownloadUrl = (channel: 'stable' | 'beta', type: string): string => {
     if (!typeData || !typeData['download-url']) return '';
     
     const downloadUrls = typeData['download-url'];
-    return downloadUrls[downloadRegion.value] || downloadUrls.china || '';
+    let url = downloadUrls[downloadRegion.value] || downloadUrls.china || '';
+    
+    // 如果URL中包含{}占位符，替换为版本号
+    if (url.includes('{}')) {
+        const version = typeData.version || '';
+        url = url.replace('{}', version);
+    }
+    
+    return url;
 };
 
 // 获取文件名

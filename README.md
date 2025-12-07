@@ -59,22 +59,19 @@ This software is open source, free of charge and for learning and exchange purpo
 
 ### 下载安装
 
-前往 [Releases](https://github.com/EveGlowLuna/StarRailAssistant-CommunityEdition/releases/latest)或 [AList](https://alist.starrailassistant.xyz/) 页面下载最新版本：
-
-- **安装包版本**：`StarRailAssistant-{版本号}-setup.exe` - 适合需要安装到系统的用户
-- **便携版本**：`StarRailAssistant-{版本号}-portable.zip` - 解压即用，适合便携使用
+前往 [Releases](https://github.com/EveGlowLuna/StarRailAssistant-CommunityEdition/releases/latest) 或 [AList](https://alist.starrailassistant.xyz/) 页面下载最新版本.
 
 ### 使用方法
 
-1. 下载并安装/解压程序
-2. 运行 `StarRailAssistant.exe`
+1. 下载并安装
+2. 在开始菜单或桌面打开 `StarRailAssistant`
 3. 配置游戏路径和账号信息
 4. 选择需要执行的任务
 5. 点击开始，坐和放宽
 
 ### 注意事项
 
-* **调整游戏分辨率为 1920×1080（推荐）并保持游戏窗口无遮挡，不要让游戏窗口超出屏幕**
+* **调整游戏分辨率为 1920×1080（推荐）或16:9比例窗口（必须）并保持游戏窗口无遮挡，不要让游戏窗口超出屏幕**
 * **执行任务时不要进行其他键鼠操作！**
 * **菜单要用初始壁纸**
 
