@@ -9,6 +9,8 @@
     "core:webview:allow-create-webview",
     "core:webview:allow-create-webview-window",
     "opener:default",
-    "dialog:default"
+    "dialog:default",
+    "fs:allow-write-text-file",
+    "fs:allow-read-text-file"
   ]
 }

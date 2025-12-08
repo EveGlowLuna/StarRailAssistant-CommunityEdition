@@ -230,6 +230,19 @@ pub fn load_settings() -> Result<AppSettings, String> {
         CESettings::default()
     };
 
+    // 解密邮件授权码（如果已加密）
+    let email_auth_code = if !main_settings.email_auth_code.is_empty() {
+        match crate::encryption::decrypt_string(&main_settings.email_auth_code) {
+            Ok(decrypted) => decrypted,
+            Err(_) => {
+                // 解密失败，可能是明文或格式错误，保持原样
+                main_settings.email_auth_code.clone()
+            }
+        }
+    } else {
+        main_settings.email_auth_code.clone()
+    };
+
     // 合并设置 - zoom需要转换为百分比
     Ok(AppSettings {
         language: main_settings.language,
@@ -241,7 +254,7 @@ pub fn load_settings() -> Result<AppSettings, String> {
         smtp_server: main_settings.smtp_server,
         smtp_port: main_settings.smtp_port,
         email_sender: main_settings.email_sender,
-        email_auth_code: main_settings.email_auth_code,
+        email_auth_code,  // 使用解密后的授权码
         email_receiver: main_settings.email_receiver,
         activity_hotkey: main_settings.activity_hotkey,
         chronicle_hotkey: main_settings.chronicle_hotkey,
@@ -298,6 +311,19 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
         serde_json::json!({})
     };
 
+    // 加密邮件授权码（如果不为空）
+    let encrypted_auth_code = if !settings.email_auth_code.is_empty() {
+        match crate::encryption::encrypt_string(&settings.email_auth_code) {
+            Ok(encrypted) => encrypted,
+            Err(e) => {
+                eprintln!("Failed to encrypt email auth code: {}", e);
+                settings.email_auth_code.clone()  // 加密失败则保存明文
+            }
+        }
+    } else {
+        settings.email_auth_code.clone()
+    };
+
     // 更新CE管理的字段 - zoom需要转换回小数
     if let Some(obj) = main_json.as_object_mut() {
         obj.insert("Language".to_string(), serde_json::json!(settings.language));
@@ -309,7 +335,7 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
         obj.insert("SmtpServer".to_string(), serde_json::json!(settings.smtp_server));
         obj.insert("SmtpPort".to_string(), serde_json::json!(settings.smtp_port));
         obj.insert("EmailSender".to_string(), serde_json::json!(settings.email_sender));
-        obj.insert("EmailAuthCode".to_string(), serde_json::json!(settings.email_auth_code));
+        obj.insert("EmailAuthCode".to_string(), serde_json::json!(encrypted_auth_code));  // 保存加密后的授权码
         obj.insert("EmailReceiver".to_string(), serde_json::json!(settings.email_receiver));
         obj.insert("ActivityHotkey".to_string(), serde_json::json!(settings.activity_hotkey));
         obj.insert("ChronicleHotkey".to_string(), serde_json::json!(settings.chronicle_hotkey));

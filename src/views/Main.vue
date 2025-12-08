@@ -151,19 +151,35 @@ const checkSubscriptionUpdates = async () => {
     const frontendVersion = await invoke<string>('get_frontend_version')
     const backendVersion = await invoke<any>('get_backend_version')
     
+    console.log('[更新检查] 开始检查更新:', {
+      订阅信息: subscription,
+      远程版本数据: latestVersions,
+      本地前端版本: frontendVersion,
+      本地后端版本: backendVersion
+    })
+    
     const updates: string[] = []
     
     // 比较版本号函数
     const compareVersions = (v1: string, v2: string): number => {
+      console.log('[compareVersions] 输入:', { v1, v2, v1_type: typeof v1, v2_type: typeof v2 })
       const parts1 = v1.split('.').map(Number)
       const parts2 = v2.split('.').map(Number)
+      console.log('[compareVersions] 分割后:', { parts1, parts2 })
       const maxLen = Math.max(parts1.length, parts2.length)
       for (let i = 0; i < maxLen; i++) {
         const p1 = parts1[i] || 0
         const p2 = parts2[i] || 0
-        if (p1 > p2) return 1
-        if (p1 < p2) return -1
+        if (p1 > p2) {
+          console.log(`[compareVersions] 结果: v1 > v2 (${p1} > ${p2} at index ${i})`)
+          return 1
+        }
+        if (p1 < p2) {
+          console.log(`[compareVersions] 结果: v1 < v2 (${p1} < ${p2} at index ${i})`)
+          return -1
+        }
       }
+      console.log('[compareVersions] 结果: v1 == v2')
       return 0
     }
     
@@ -177,6 +193,12 @@ const checkSubscriptionUpdates = async () => {
     let hasFrontendUpdate = false
     if (frontendChannelItem && frontendChannelItem[frontendChannel]) {
       const remoteVersion = frontendChannelItem[frontendChannel].frontend?.version
+      console.log('[更新检查] 前端版本比较:', {
+        本地版本: frontendVersion,
+        远程版本: remoteVersion,
+        渠道: frontendChannel,
+        比较结果: remoteVersion ? compareVersions(remoteVersion, frontendVersion) : 'N/A'
+      })
       if (remoteVersion && compareVersions(remoteVersion, frontendVersion) > 0) {
         hasFrontendUpdate = true
         const channelText = frontendChannel === 'stable' 
@@ -196,7 +218,20 @@ const checkSubscriptionUpdates = async () => {
       const backendChannelItem = latestVersions.find((item: any) => item[backendChannel])
       if (backendChannelItem && backendChannelItem[backendChannel]) {
         const remoteVersion = backendChannelItem[backendChannel].backend?.version
-        if (remoteVersion && compareVersions(remoteVersion, backendVersion.version) > 0) {
+        const localVersion = backendVersion.version
+        console.log('[更新检查] 后端版本比较:', {
+          本地版本: localVersion,
+          本地版本类型: typeof localVersion,
+          本地版本JSON: JSON.stringify(localVersion),
+          远程版本: remoteVersion,
+          远程版本类型: typeof remoteVersion,
+          远程版本JSON: JSON.stringify(remoteVersion),
+          渠道: backendChannel,
+          完整后端对象: backendVersion
+        })
+        const comparisonResult = remoteVersion ? compareVersions(remoteVersion, localVersion) : null
+        console.log('[更新检查] 比较结果:', comparisonResult)
+        if (remoteVersion && comparisonResult > 0) {
           const channelText = backendChannel === 'stable' 
             ? t('home.notifications.stable').value 
             : t('home.notifications.beta').value
