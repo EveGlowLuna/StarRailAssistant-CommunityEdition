@@ -162,13 +162,12 @@ jobs:
           set -xe
           shopt -s nullglob
           TAGNAME="v${{ steps.read_info.outputs.version }}"
-          NAME="StarRailAssistant Community Edition v${{ steps.read_info.outputs.version }}"
           CHANNEL="${{ steps.read_info.outputs.channel }}"
           
           if [[ "$CHANNEL" == "beta" ]]; then
-            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" --prerelease artifacts/*
+            gh release create "$TAGNAME" --target "main" --title "$TAGNAME" --notes "${{ steps.prepare_notes.outputs.notes }}" --prerelease artifacts/*
           else
-            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" artifacts/*
+            gh release create "$TAGNAME" --target "main" --title "$TAGNAME" --notes "${{ steps.prepare_notes.outputs.notes }}" artifacts/*
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
@@ -179,15 +178,14 @@ jobs:
           set -xe
           shopt -s nullglob
           TAGNAME="v${{ steps.read_info.outputs.version }}"
-          NAME="StarRailAssistant Community Edition v${{ steps.read_info.outputs.version }}"
           CHANNEL="${{ steps.read_info.outputs.channel }}"
           
           gh release delete "$TAGNAME" --yes
           
           if [[ "$CHANNEL" == "beta" ]]; then
-            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" --prerelease artifacts/*
+            gh release create "$TAGNAME" --target "main" --title "$TAGNAME" --notes "${{ steps.prepare_notes.outputs.notes }}" --prerelease artifacts/*
           else
-            gh release create "$TAGNAME" --target "main" --title "$NAME" --notes "${{ steps.prepare_notes.outputs.notes }}" artifacts/*
+            gh release create "$TAGNAME" --target "main" --title "$TAGNAME" --notes "${{ steps.prepare_notes.outputs.notes }}" artifacts/*
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
