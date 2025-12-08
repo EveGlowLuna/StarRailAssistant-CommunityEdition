@@ -192,50 +192,67 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 
-#      - name: Trigger MirrorChyanUploading
-#        shell: bash
-#        run: |
-#          gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan
-#          gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_release_note
-#        env:
-#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy_server:
+    name: Deploy to Server
+    needs: [build, publish_release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: StarRailAssistant*
+          merge-multiple: true
+          path: artifacts
           
-  # mirrorchyan:
-  #   needs: publish_release
-  #   runs-on: macos-latest
-  #   if: ${{ github.repository_owner == 'Shasnow' }}
-  #   steps:
-  #     - name: upload
-  #       uses: MirrorChyan/uploading-action@v1
-  #       with:
-  #         filetype: latest-release
-  #         filename: "StarRailAssistant_v*.zip"
-  #         mirrorchyan_rid: StarRailAssistant
-
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         owner: ${{ github.repository_owner }}
-  #         repo: ${{ github.event.repository.name }}
-  #         upload_token: ${{ secrets.MirrorChyanUploadToken }}
+      - name: Read version and channel
+        id: read_info
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          CHANNEL=$(head -n 1 information.md | sed 's/channel://g' | sed 's/\r$//g' | xargs)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
           
-  #     - name: release note
-  #       uses: MirrorChyan/release-note-action@v1
-  #       with:
-  #         mirrorchyan_rid: StarRailAssistant
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOSTNAME }} >> ~/.ssh/known_hosts
           
-  #         upload_token: ${{ secrets.MirrorChyanUploadToken }}
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy Announcement Server
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}"
           
-  # auto_mas:
-  #   runs-on: ubuntu-latest
-  #   needs: mirrorchyan
-  #   steps:
-  #     - name: Download Version_Info
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: version_info
-  #         path: ./version_info
-  #     - name: Update Auto-MAS
-  #       run: |
-  #         VERSION=$(sed 's/\r$//g' <(head -n 1 version_info/version_info.txt))
-  #         CHANNEL=$([[ "$VERSION" == *"-beta"* ]] && echo "beta" || echo "stable")
-  #         curl -X POST -H "Content-Type: application/json" -d '{"version": "'"$VERSION"'", "res_id": "StarRailAssistant", "channel": "'"$CHANNEL"'"}' "${{ secrets.UPDATE_URL }}"
+          # 1. 上传 announces 目录
+          $SSH_CMD "rm -rf /root/serve/announces"
+          scp -i ~/.ssh/id_ed25519 -r Announcement-Server/announces ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          
+          # 2. 上传 info.json
+          $SSH_CMD "rm -f /root/serve/info.json"
+          scp -i ~/.ssh/id_ed25519 Announcement-Server/info.json ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          
+          # 3. 关闭公告服务
+          $SSH_CMD "sudo systemctl kill announcement"
+          
+          # 4. 上传 server.py
+          $SSH_CMD "rm -f /root/serve/server.py"
+          scp -i ~/.ssh/id_ed25519 Announcement-Server/server.py ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          
+          # 5. 启动公告服务
+          $SSH_CMD "sudo systemctl start announcement"
+          
+      - name: Deploy Build Artifacts
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}"
+          CHANNEL="${{ steps.read_info.outputs.channel }}"
+          
+          if [[ "$CHANNEL" == "beta" ]]; then
+            TARGET_DIR="/root/storage/beta"
+          else
+            TARGET_DIR="/root/storage/release"
+          fi
+          
+          scp -i ~/.ssh/id_ed25519 artifacts/* ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:$TARGET_DIR/
