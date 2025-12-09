@@ -202,19 +202,21 @@ jobs:
           echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
           
       - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOSTNAME }}
+          SSH_USER: ${{ secrets.SERVER_USER }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          
-          cat >> ~/.ssh/config << EOF
-          Host deploy-server
-            HostName ${{ secrets.SSH_HOSTNAME }}
-            User ${{ secrets.SERVER_USER }}
-            IdentityFile ~/.ssh/id_ed25519
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-          EOF
+          echo "Host deploy-server" > ~/.ssh/config
+          echo "  HostName $SSH_HOST" >> ~/.ssh/config
+          echo "  User $SSH_USER" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
           
       - name: Deploy Announcement Server
         run: |
