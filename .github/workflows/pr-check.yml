@@ -1,0 +1,151 @@
+name: PR Build Check (Full Mirror)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-build:
+    name: PR Build (Windows Full)
+    runs-on: windows-latest
+
+    steps:
+      # -----------------------------------------
+      # 0. Checkout
+      # -----------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # -----------------------------------------
+      # 1. Install Node
+      # -----------------------------------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies
+        run: npm install
+
+      # -----------------------------------------
+      # 2. Install Rust
+      # -----------------------------------------
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: false
+
+      # -----------------------------------------
+      # 3. Install Python + Run python package
+      # -----------------------------------------
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Python package
+        run: |
+          cd SRA-CE-cil
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          pip install -r requirements.txt
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          python package.py
+          cd ..
+
+      # -----------------------------------------
+      # 4. Read version/channel
+      # -----------------------------------------
+      - name: Read version and channel
+        id: read_info
+        shell: pwsh
+        run: |
+          $VERSION=(Get-Content -Path "package.json" | ConvertFrom-Json).version
+          $CHANNEL=(Get-Content -Path "information.md" -TotalCount 1).Replace("channel:", "").Trim()
+          "version=$VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "channel=$CHANNEL" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "Version: $VERSION"
+          echo "Channel: $CHANNEL"
+
+      # -----------------------------------------
+      # 5. Install Inno Setup
+      # -----------------------------------------
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress --yes
+
+      # -----------------------------------------
+      # 6. Build project — capture logs
+      # -----------------------------------------
+      - name: Build project (capture log)
+        id: build_step
+        shell: pwsh
+        run: |
+          npm run package 2>&1 | Tee-Object -FilePath build.log
+        continue-on-error: true
+
+      # -----------------------------------------
+      # 7. Build failed? Extract last log lines
+      # -----------------------------------------
+      - name: Extract last 200 lines from build.log
+        if: steps.build_step.outcome == 'failure'
+        id: read_log
+        shell: pwsh
+        run: |
+          if (Test-Path build.log) {
+            $lines = Get-Content build.log -Tail 200
+            "``````" | Out-File -FilePath short_error.log -Encoding utf8
+            $lines | Out-File -FilePath short_error.log -Append -Encoding utf8
+            "``````" | Out-File -FilePath short_error.log -Append -Encoding utf8
+          } else {
+            "``````" | Out-File -FilePath short_error.log -Encoding utf8
+            "build.log not found" | Out-File -FilePath short_error.log -Append -Encoding utf8
+            "``````" | Out-File -FilePath short_error.log -Append -Encoding utf8
+          }
+
+      - name: Export short log
+        if: steps.build_step.outcome == 'failure'
+        id: export_short
+        shell: pwsh
+        run: |
+          $content = Get-Content short_error.log -Raw
+          "short_error<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          $content | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      # -----------------------------------------
+      # 8. PR comment (sticky)
+      # -----------------------------------------
+      - name: Post PR build result
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          header: pr-build-result
+          message: |
+            ## 🔍 Pull Request 构建检查结果
+
+            **构建状态：** `${{ steps.build_step.outcome }}`  
+            **提交：** `${{ github.sha }}`  
+            **CI 运行：** [查看 Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ${{ steps.build_step.outcome == 'success' && '🎉 构建成功！安装包已成功生成。' || '' }}
+
+            ${{ steps.build_step.outcome == 'failure' && '❌ 构建失败，下面是错误日志的最后 200 行：' || '' }}
+
+            ${{ steps.build_step.outcome == 'failure' && steps.export_short.outputs.short_error || '' }}
+
+      # -----------------------------------------
+      # 9. Fail workflow if build failed
+      # -----------------------------------------
+      - name: Fail if build failed
+        if: steps.build_step.outcome == 'failure'
+        run: exit 1
