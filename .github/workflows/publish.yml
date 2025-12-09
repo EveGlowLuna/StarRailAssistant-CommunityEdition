@@ -26,20 +26,8 @@ permissions:
   actions: write
 
 jobs:
-  pre_check:
-    name: Pre Checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Repo Check
-        run: |
-          if [[ "$GITHUB_REPOSITORY" != "EveGlowLuna/StarRailAssistant-CommunityEdition" ]]; then
-            echo "When forking this repository to make your own builds, you have to adjust this check."
-            exit 1
-          fi
-          exit 0
   build:
     runs-on: windows-latest
-    needs: pre_check
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -215,36 +203,41 @@ jobs:
           
       - name: Setup SSH
         run: |
+          set -e
           mkdir -p ~/.ssh
+          if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then
+            echo "Error: SERVER_SSH_KEY is empty"
+            exit 1
+          fi
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.SSH_HOSTNAME }} >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          echo "SSH key configured"
+          ssh-keyscan -H ${{ secrets.SSH_HOSTNAME }} >> ~/.ssh/known_hosts 2>&1 || true
+          echo "SSH setup completed"
           
       - name: Deploy Announcement Server
         run: |
-          SSH_CMD="ssh -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}"
-          
           # 1. 上传 announces 目录
-          $SSH_CMD "rm -rf /root/serve/announces"
-          scp -i ~/.ssh/id_ed25519 -r Announcement-Server/announces ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "rm -rf /root/serve/announces"
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -r Announcement-Server/announces ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
           
           # 2. 上传 info.json
-          $SSH_CMD "rm -f /root/serve/info.json"
-          scp -i ~/.ssh/id_ed25519 Announcement-Server/info.json ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "rm -f /root/serve/info.json"
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 Announcement-Server/info.json ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
           
           # 3. 关闭公告服务
-          $SSH_CMD "sudo systemctl kill announcement"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "sudo systemctl kill announcement || true"
           
           # 4. 上传 server.py
-          $SSH_CMD "rm -f /root/serve/server.py"
-          scp -i ~/.ssh/id_ed25519 Announcement-Server/server.py ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "rm -f /root/serve/server.py"
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 Announcement-Server/server.py ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
           
           # 5. 启动公告服务
-          $SSH_CMD "sudo systemctl start announcement"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "sudo systemctl start announcement"
           
       - name: Deploy Build Artifacts
         run: |
-          SSH_CMD="ssh -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}"
           CHANNEL="${{ steps.read_info.outputs.channel }}"
           
           if [[ "$CHANNEL" == "beta" ]]; then
@@ -253,4 +246,4 @@ jobs:
             TARGET_DIR="/root/storage/release"
           fi
           
-          scp -i ~/.ssh/id_ed25519 artifacts/* ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:$TARGET_DIR/
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 artifacts/* ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:$TARGET_DIR/
