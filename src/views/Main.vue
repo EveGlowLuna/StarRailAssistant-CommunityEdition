@@ -231,7 +231,7 @@ const checkSubscriptionUpdates = async () => {
         })
         const comparisonResult = remoteVersion ? compareVersions(remoteVersion, localVersion) : null
         console.log('[更新检查] 比较结果:', comparisonResult)
-        if (remoteVersion && comparisonResult > 0) {
+        if (remoteVersion && comparisonResult !== null && comparisonResult > 0) {
           const channelText = backendChannel === 'stable' 
             ? t('home.notifications.stable').value 
             : t('home.notifications.beta').value

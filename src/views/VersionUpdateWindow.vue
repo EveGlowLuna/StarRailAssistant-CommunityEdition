@@ -721,6 +721,7 @@ const downloadAndInstall = async (channel: 'stable' | 'beta', type: string) => {
         }
         
         // 5. 开始下载
+        await window.logToConsole?.('前端', 'DEBUG', `下载链接: ${downloadUrl}`);
         await window.logToConsole?.('前端', 'INFO', t('versionUpdate.download.starting').value.replace('{fileName}', fileName).replace('{channel}', channel));
         
         const filePath = await invoke<string>('download_update', {
