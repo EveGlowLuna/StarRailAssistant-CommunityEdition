@@ -203,38 +203,38 @@ jobs:
           
       - name: Setup SSH
         run: |
-          set -e
           mkdir -p ~/.ssh
-          if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then
-            echo "Error: SERVER_SSH_KEY is empty"
-            exit 1
-          fi
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          chmod 700 ~/.ssh
-          echo "SSH key configured"
-          ssh-keyscan -H ${{ secrets.SSH_HOSTNAME }} >> ~/.ssh/known_hosts 2>&1 || true
-          echo "SSH setup completed"
+          
+          cat >> ~/.ssh/config << EOF
+          Host deploy-server
+            HostName ${{ secrets.SSH_HOSTNAME }}
+            User ${{ secrets.SERVER_USER }}
+            IdentityFile ~/.ssh/id_ed25519
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          EOF
           
       - name: Deploy Announcement Server
         run: |
           # 1. 上传 announces 目录
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "rm -rf /root/serve/announces"
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -r Announcement-Server/announces ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          ssh deploy-server "rm -rf /root/serve/announces"
+          scp -r Announcement-Server/announces deploy-server:/root/serve/
           
           # 2. 上传 info.json
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "rm -f /root/serve/info.json"
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 Announcement-Server/info.json ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          ssh deploy-server "rm -f /root/serve/info.json"
+          scp Announcement-Server/info.json deploy-server:/root/serve/
           
           # 3. 关闭公告服务
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "sudo systemctl kill announcement || true"
+          ssh deploy-server "sudo systemctl kill announcement || true"
           
           # 4. 上传 server.py
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "rm -f /root/serve/server.py"
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 Announcement-Server/server.py ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:/root/serve/
+          ssh deploy-server "rm -f /root/serve/server.py"
+          scp Announcement-Server/server.py deploy-server:/root/serve/
           
           # 5. 启动公告服务
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }} "sudo systemctl start announcement"
+          ssh deploy-server "sudo systemctl start announcement"
           
       - name: Deploy Build Artifacts
         run: |
@@ -246,4 +246,4 @@ jobs:
             TARGET_DIR="/root/storage/release"
           fi
           
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 artifacts/* ${{ secrets.SERVER_USER }}@${{ secrets.SSH_HOSTNAME }}:$TARGET_DIR/
+          scp artifacts/* deploy-server:$TARGET_DIR/
